@@ -1,0 +1,11 @@
+Build/CMakeFiles/*
+Build/Makefile
+Build/CMakeCache.txt
+Build/bin/Urho3D.log
+Build/*.cmake
+*.bin
+*.exe
+Build/*.dll.a
+Build/*.cbp
+Build/*.layout
+*.blend1
