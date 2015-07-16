@@ -79,12 +79,14 @@ public:
     Urho3D::String sound_name;
     Urho3D::String skybox_material="Materials/Skybox.xml";
     float level_min_height=0;
-    float gravity=-9.81*4;
+    float gravity=-9.81;
 
     level(){}
-    /// loads a level from an XML file
+    /// loads a level from an XML or LUA file
     level(std::string filename);
     //void save();                    // saves a level to an XML file, not implemented but could be useful for an editor
+
+    void load_lua_level(std::string level_filename);
 };
 
 /// The game state handling playing a level.

@@ -10,8 +10,15 @@
 
 using namespace Urho3D;
 
+// it may be better to do file loading with the proper Urho functions which search all registered paths
 level::level(std::string level_filename)
 {
+    if(level_filename.substr(level_filename.size()-4)==".lua")
+    {
+        load_lua_level(level_filename);
+        return;
+    }
+
     pugi::xml_document doc;
     pugi::xml_parse_result result=doc.load_file(("Data/"+level_filename).c_str());
     if(!result)
@@ -148,6 +155,15 @@ level::level(std::string level_filename)
             }
         }
     }
+}
+
+void level::load_lua_level(std::string level_filename)
+{
+    std::cout<<"loading level \""<<level_filename<<"\" via LUA script"<<std::endl;
+
+    // TODO: Execute the LUA script after having given some functions which can be called by LUA.
+    // Currently it could just fill this level object like the XML loading function above does.
+    // Could use some kind of instance if member functions can't be bound directly.
 }
 
 ///////////////

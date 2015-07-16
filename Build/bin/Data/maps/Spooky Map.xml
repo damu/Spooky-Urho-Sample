@@ -1,6 +1,6 @@
-<xml skybox="Materials/skybox_space.xml" gravity="-9.81">
+<xml skybox="Materials/skybox_space.xml">
   <static_model name="Data/Models/level_2" pos_x="0" pos_y="0" pos_z="0" />
-  <player pos_x="25" pos_y="-37" pos_z="285" />
+  <player pos_x="56" pos_y="-35" pos_z="206" />
   <flag pos_x="1.8" pos_y="15.5" pos_z="626.8" />
   <flag pos_x="1.5" pos_y="15.9" pos_z="579.6" />
   <flag pos_x="2.1" pos_y="14.2" pos_z="490.0" />

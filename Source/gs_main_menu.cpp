@@ -151,7 +151,7 @@ gs_main_menu::gs_main_menu() : game_state()
             t->SetFont(globals::instance()->cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"),20);
             t->SetText("   "+s);
             t->SetStyle("Text");
-            t->SetVar("filename",s);
+            t->SetVar("filename",result[i]);
             t->SetMinHeight(30);
             lv_levels->AddItem(t);
             if(i==0)
@@ -209,28 +209,6 @@ void gs_main_menu::update(StringHash eventType,VariantMap& eventData)
 {
     float timeStep=eventData[Update::P_TIMESTEP].GetFloat();
 
-
-
-
-    static double last_second=0;
-    static double last_second_frames=1;
-    static timer this_second;
-    static double this_second_frames=0;
-    this_second_frames++;
-    if(this_second.until_now()>=1)
-    {
-        last_second=this_second.until_now();
-        last_second_frames=this_second_frames;
-        this_second.reset();
-        this_second_frames=0;
-    }
-
-    //if(last_second!=0)
-    //    cout<<std::to_string(last_second_frames/last_second)<<endl;
-
-
-
-
     node_rotating_flag->Rotate(Quaternion(0,64*timeStep,0));
 
     // Movement speed as world units per second
@@ -274,10 +252,12 @@ void gs_main_menu::update(StringHash eventType,VariantMap& eventData)
     for(int i=0;i<lv_levels->GetNumItems();i++)
     {
         Text* t=(Text*)lv_levels->GetItem(i);
+        String s=t->GetVar("filename").GetString();
+        s=s.Substring(0,s.FindLast('.'));
         if(lv_levels->IsSelected(i))
-            t->SetText("-> "+t->GetVar("filename").GetString()+" ("+std::to_string(highscores.get((t->GetVar("filename").GetString()+".xml").CString())).c_str()+"s)");
+            t->SetText("-> "+s+" ("+std::to_string(highscores.get((t->GetVar("filename").GetString()+".xml").CString())).c_str()+"s)");
         else
-            t->SetText("   "+t->GetVar("filename").GetString()+" ("+std::to_string(highscores.get((t->GetVar("filename").GetString()+".xml").CString())).c_str()+"s)");
+            t->SetText("   "+s+" ("+std::to_string(highscores.get((t->GetVar("filename").GetString()+".xml").CString())).c_str()+"s)");
     }
 }
 
@@ -287,7 +267,7 @@ void gs_main_menu::HandlePlayPressed(Urho3D::StringHash eventType,Urho3D::Varian
     if(!t)
         return;
 
-    globals::instance()->game_states[0].reset(new gs_playing(("maps/"+t->GetVar("filename").GetString()+".xml").CString()));
+    globals::instance()->game_states[0].reset(new gs_playing(("maps/"+t->GetVar("filename").GetString()).CString()));
 }
 
 void gs_main_menu::HandleKeyDown(StringHash eventType,VariantMap& eventData)
