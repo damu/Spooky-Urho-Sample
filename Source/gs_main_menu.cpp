@@ -14,7 +14,7 @@ gs_main_menu::gs_main_menu() : game_state()
     {
         node_rotating_flag=globals::instance()->scene->CreateChild("Flag");
         nodes.push_back(node_rotating_flag);
-        node_rotating_flag->SetPosition(Vector3(100,-0.5,6));
+        node_rotating_flag->SetPosition(Vector3(0,-0.5,6));
         StaticModel* boxObject=node_rotating_flag->CreateComponent<StaticModel>();
         boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/flag.mdl"));
         boxObject->SetMaterial(0,globals::instance()->cache->GetResource<Material>("Materials/flag_pole.xml"));
@@ -56,7 +56,7 @@ gs_main_menu::gs_main_menu() : game_state()
         Light* light=lightNode->CreateComponent<Light>();
         light->SetLightType(LIGHT_POINT);
         light->SetRange(50);
-        light->SetBrightness(1.2);
+        light->SetBrightness(1.0);
         light->SetColor(Color(1.0,0.6,0.3,1.0));
         light->SetCastShadows(true);
         light->SetShadowDistance(200);
@@ -79,17 +79,16 @@ gs_main_menu::gs_main_menu() : game_state()
     }
 
     // grid of 400 cubes, known from the basic sample application at the Urho Wiki
-    if(false)
     for(int x=-30;x<30;x+=3)
         for(int y=-30;y<30;y+=3)
         {
             Node* boxNode_=globals::instance()->scene->CreateChild("Box");
             nodes.push_back(boxNode_);
-            boxNode_->SetPosition(Vector3(x,-1,y));
-            boxNode_->SetScale(Vector3(3,3,3));
+            boxNode_->SetPosition(Vector3(x,-1.5,y));
+            boxNode_->SetScale(Vector3(2,2,2));
             StaticModel* boxObject=boxNode_->CreateComponent<StaticModel>();
             boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/Box.mdl"));
-            boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/stones_quad.xml"));
+            boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/Stone.xml"));
             //boxObject->SetCastShadows(true);
         }
 
