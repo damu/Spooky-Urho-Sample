@@ -168,7 +168,7 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
         window->SetAlignment(HA_CENTER,VA_TOP);
 
         window_text=new Text(context_);
-        window_text->SetFont(globals::instance()->cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"),20);
+        window_text->SetFont(globals::instance()->cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"),16);
         window_text->SetColor(Color(.8,.85,.9));
         window_text->SetAlignment(HA_CENTER,VA_CENTER);
         window->AddChild(window_text);
@@ -229,9 +229,6 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
             set_model(boxObject,globals::instance()->cache,"Data/Models/flag");
             boxObject->SetCastShadows(true);
             flag_nodes.push_back(n);
-
-            ParticleEmitter* emitter=n->CreateComponent<ParticleEmitter>();
-            emitter->SetEffect(globals::instance()->cache->GetResource<ParticleEffect>("Particle/flag.xml"));
         }
 
         for(auto p:current_level.torch_positions)
@@ -258,7 +255,7 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
         light->SetShadowCascade(CascadeParameters(20.0f,60.0f,180.0f,560.0f,100.0f,100.0f));
         light->SetShadowResolution(1.0);
         light->SetBrightness(1.2);
-        light->SetColor(Color(1.5,1.2,1,1));
+        light->SetColor(Color(0.02,0.05,0.1,1));
         lightNode->SetDirection(Vector3::FORWARD);
         lightNode->Yaw(-150);   // horizontal
         lightNode->Pitch(60);   // vertical
@@ -266,7 +263,7 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
 
         BillboardSet* billboardObject=lightNode->CreateComponent<BillboardSet>();
         billboardObject->SetNumBillboards(1);
-        billboardObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/sun.xml"));
+        billboardObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/moon.xml"));
         billboardObject->SetSorted(true);
         Billboard* bb=billboardObject->GetBillboard(0);
         bb->size_=Vector2(10000,10000);
@@ -390,10 +387,11 @@ std::string str;
         else
             str.append(std::to_string(timer_playing));
 
-        str.append("s\nRemaining Flags: ");
+        str.append("s Remaining Flags: ");
         str.append(std::to_string(flag_nodes.size()));
         str.append("/");
         str.append(std::to_string(current_level.flag_positions.size()));
+        str.append("\nUse WASD and shift to move and F to toggle flashlight.");
         if(goal_time>0)
             str.append("\nFinished!");
 
@@ -460,6 +458,8 @@ void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
         spawn_torch(player_->node->GetPosition()+Vector3(2,1.9,0));
     if(key==KEY_V)
         player_->camera_first_person=!player_->camera_first_person;
+    if(key==KEY_F)
+        player_->light->SetBrightness(player_->light->GetBrightness()>0.5?0:1.5);
 }
 
 void gs_playing::spawn_torch(Vector3 pos)

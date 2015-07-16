@@ -1,0 +1,5 @@
+<material>
+    <technique name="Techniques/DiffUnlitAlpha.xml" />
+    <parameter name="MatDiffColor" value="0.4 0.4 0.5 1" />    
+    <texture unit="diffuse" name="Textures/sun.png" />
+</material>

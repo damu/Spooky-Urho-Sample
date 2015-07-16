@@ -1,4 +1,4 @@
-<xml>
+<xml gravity="-9.81">
   <static_model name="Data/Models/level_1" pos_x="0" pos_y="0" pos_z="-10" />
   <player pos_x="4" pos_y="10" pos_z="-5" />
   <flag pos_x="20.35" pos_y="14" pos_z="-47.6" />

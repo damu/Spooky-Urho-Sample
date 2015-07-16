@@ -104,7 +104,7 @@ public:
         zone->SetBoundingBox(BoundingBox(-50000.0f,50000.0f));
         zone->SetFogStart(100000.0f);
         zone->SetFogEnd(200000.0f);
-        zone->SetAmbientColor(Color(0.1,0.1,0.1));
+        zone->SetAmbientColor(Color(0.03,0.03,0.03));
 
         SubscribeToEvent(E_KEYDOWN,HANDLER(USP,HandleKeyDown));
 

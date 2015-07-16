@@ -1,4 +1,4 @@
-<xml skybox="Materials/skybox_space.xml" level_min_height="-1500" gravity="-10">
+<xml skybox="Materials/skybox_space.xml" level_min_height="-1500" gravity="-2">
   <static_model name="Data/Models/level_3" pos_x="0" pos_y="0" pos_z="0" />
   <static_model name="Data/Models/planet" pos_x="0" pos_y="-7500" pos_z="0" scale="3000" />
   <player pos_x="0" pos_y="0" pos_z="0" />

@@ -9,7 +9,7 @@ class player
 public:
     Urho3D::Vector3 pos_last;
     Urho3D::AnimationState* as_stand;
-    //Urho3D::AnimationState* as_walk;
+    Urho3D::AnimationState* as_walk;
     Urho3D::AnimationState* as_run;
     Urho3D::AnimationState* as_jump;
     Urho3D::AnimationState* as_reversing;
@@ -22,6 +22,8 @@ public:
     Urho3D::Node* node;
     Urho3D::Node* node_model;
     Urho3D::Node* node_light;
+    Urho3D::Node* node_camera_pos;
+    Urho3D::Light* light;
     Urho3D::RigidBody* body;
     Urho3D::SoundSource3D* sound_source1;
     Urho3D::SoundSource3D* sound_source2;
@@ -34,7 +36,9 @@ public:
     float camera_distance=14;
     float camera_yaw=20;
     float camera_pitch=20;
-    bool camera_first_person=false;
+    float light_yaw=20;
+    float light_pitch=90;
+    bool camera_first_person=true;
 
     /// \brief The game state is given to add the player nodes to the node clean-up list of the game state.
     player(Urho3D::Vector3 pos,game_state* gs);
