@@ -124,6 +124,7 @@ player::player(Vector3 pos,game_state* gs)
         light->SetColor(Color(1.0,1.0,1.0,1.0)*1);
         light->SetCastShadows(true);
         light->SetFov(40);
+        light->SetShapeTexture(globals::instance()->cache->GetResource<Texture>("Textures/flashlight.png"));
     }
 
     {
@@ -138,12 +139,11 @@ player::player(Vector3 pos,game_state* gs)
         sound_source2->SetFarDistance(55);
         sound_source2->SetSoundType(SOUND_EFFECT);
 
-        sound_steam=globals::instance()->cache->GetResource<Sound>("Sounds/steam.ogg");
-        sound_steam->SetLooped(true);
-        sound_source_steam=node_model->CreateComponent<SoundSource3D>();
-        sound_source_steam->SetNearDistance(1);
-        sound_source_steam->SetFarDistance(55);
-        sound_source_steam->SetSoundType(SOUND_EFFECT);
+        sound_flashlight_button=globals::instance()->cache->GetResource<Sound>("Sounds/flashlight_button.ogg");
+        sound_source_flashlight_button=node_model->CreateComponent<SoundSource3D>();
+        sound_source_flashlight_button->SetNearDistance(1);
+        sound_source_flashlight_button->SetFarDistance(55);
+        sound_source_flashlight_button->SetSoundType(SOUND_EFFECT);
 
         sound_flag=globals::instance()->cache->GetResource<Sound>("Sounds/littlerobotsoundfactory__jingle-win-synth-04.ogg");
         sound_source_flag=node_model->CreateComponent<SoundSource3D>();
@@ -277,9 +277,6 @@ void player::update(Input* input,float timeStep)
             }
             if(jumping!=1)
                 jump_force_applied=0;
-
-            if(!emitter_foot_left->IsEmitting()&&sound_source_steam->IsPlaying())
-                sound_source_steam->Stop();
         }
 
         float f=0.5;    // for walking or sprinting

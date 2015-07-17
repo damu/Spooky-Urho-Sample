@@ -475,7 +475,10 @@ void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
     if(key==KEY_V)
         player_->camera_first_person=!player_->camera_first_person;
     if(key==KEY_F)
+    {
         player_->light->SetBrightness(player_->light->GetBrightness()>0.5?0:1.5);
+        player_->sound_source_flashlight_button->Play(player_->sound_flashlight_button);
+    }
 }
 
 void gs_playing::spawn_torch(Vector3 pos)

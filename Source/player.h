@@ -27,11 +27,11 @@ public:
     Urho3D::RigidBody* body;
     Urho3D::SoundSource3D* sound_source1;
     Urho3D::SoundSource3D* sound_source2;
-    Urho3D::SoundSource3D* sound_source_steam;
+    Urho3D::SoundSource3D* sound_source_flashlight_button;
     Urho3D::SoundSource3D* sound_source_flag;
     Urho3D::Sound* sound_step1;
     Urho3D::Sound* sound_step2;
-    Urho3D::Sound* sound_steam;
+    Urho3D::Sound* sound_flashlight_button;
     Urho3D::Sound* sound_flag;
     float camera_distance=14;
     float camera_yaw=20;
