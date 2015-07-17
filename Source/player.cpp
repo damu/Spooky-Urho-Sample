@@ -366,13 +366,13 @@ void player::update(Input* input,float timeStep)
 
     node_light->SetPosition(node_camera_pos->GetWorldPosition());
     node_light->Translate(Vector3(0.5,-0.9,0.3));
-    float yaw_360_correction=camera_yaw-light_yaw;
+    float yaw_360_correction=(camera_yaw+Random(-light_shaking,light_shaking))-light_yaw;
     if(yaw_360_correction>180)
         yaw_360_correction-=360;
     else if(yaw_360_correction<-180)
         yaw_360_correction+=360;
     light_yaw+=yaw_360_correction*(10*timeStep);
-    light_pitch+=(camera_pitch-light_pitch)*(10*timeStep);
+    light_pitch+=((camera_pitch+Random(-light_shaking,light_shaking))-light_pitch)*(10*timeStep);
     node_light->SetDirection(Vector3::FORWARD);
     node_light->Yaw(light_yaw);
     node_light->Pitch(light_pitch);

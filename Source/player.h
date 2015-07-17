@@ -38,6 +38,7 @@ public:
     float camera_pitch=20;
     float light_yaw=20;
     float light_pitch=90;
+    float light_shaking=1;
     bool camera_first_person=true;
 
     /// \brief The game state is given to add the player nodes to the node clean-up list of the game state.
