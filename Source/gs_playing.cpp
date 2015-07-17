@@ -327,6 +327,8 @@ void gs_playing::update(StringHash eventType,VariantMap& eventData)
     if(globals::instance()->game_states.size()>1)
         return;
 
+    delayed_actions.update();
+
     Input* input=GetSubsystem<Input>();
     float timeStep=eventData[Update::P_TIMESTEP].GetFloat();
     timer_playing+=timeStep;
@@ -476,8 +478,8 @@ void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
         player_->camera_first_person=!player_->camera_first_person;
     if(key==KEY_F)
     {
-        player_->light->SetBrightness(player_->light->GetBrightness()>0.5?0:1.5);
         player_->sound_source_flashlight_button->Play(player_->sound_flashlight_button);
+        delayed_actions.insert(0.2,[this]{player_->light->SetBrightness(player_->light->GetBrightness()>0.5?0:1.5);});
     }
 }
 

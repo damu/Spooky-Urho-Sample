@@ -59,6 +59,40 @@ public:
     operator double() const {return until_now();}
 };
 
+/**
+ * @brief This class takes lambdas and a delay (in seconds) to execute them later. The update() function is thought to be called each frame.
+* Example:
+ * \code
+ * // add an action to be executed in 0.2s
+ * delayed_actions.insert(0.2,
+ *                        [this]
+ *                        {
+ *                            player_->light->SetBrightness(player_->light->GetBrightness()>0.5?0:1.5);  // toggle flashlight with a delay to fit to the sound
+ *                        });
+ *
+ * \endcode
+ */
+class delayed_action_handler
+{
+    std::map<std::chrono::steady_clock::time_point,std::function<void()>> actions;
+public:
+    void insert(float wait_time,std::function<void()> lambda){actions.emplace(std::chrono::steady_clock::now()+std::chrono::milliseconds(int(wait_time*1000)),lambda);}
+
+    void update()
+    {
+        auto time_over=std::chrono::steady_clock::now();
+again:
+        auto iter=actions.begin();
+        if(iter!=actions.end())
+            if(iter->first<=time_over)
+            {
+                iter->second();
+                actions.erase(iter);
+                goto again;
+            }
+    }
+};
+
 /// \brief Calls SetModel on the given model and tries to load the model file and all texture files mentioned in a model_name+".txt".
 /// model_name is supposed to have no file extension. Example: "Data/Models/Box", loads the model "Data/Models/Box.mdl".
 /// It's a template to support all model classes like AnimatedModel and StaticModel.

@@ -101,6 +101,7 @@ public:
     std::unique_ptr<player> player_;
     float level_min_height=999999;          ///< When the player gets below this height, he dies.
     level current_level;
+    delayed_action_handler delayed_actions;
 
     gs_playing(std::string level_filename);
     void update(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
