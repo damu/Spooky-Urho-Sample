@@ -13,14 +13,7 @@
 #include <Urho3D/Graphics/Skybox.h>
 #include <Urho3D/Graphics/ParticleEmitter.h>
 #include <Urho3D/Graphics/ParticleEffect.h>
-#include <Urho3D/Graphics/Light.h>
-#include <Urho3D/Graphics/Model.h>
-#include <Urho3D/Graphics/StaticModel.h>
-#include <Urho3D/Graphics/Animation.h>
-#include <Urho3D/Graphics/AnimatedModel.h>
-#include <Urho3D/Graphics/AnimationState.h>
-#include <Urho3D/Graphics/Material.h>
-#include <Urho3D/Graphics/Skybox.h>
+#include <Urho3D/Graphics/Texture2D.h>
 #include <Urho3D/UI/Button.h>
 #include <Urho3D/UI/BorderImage.h>
 #include <Urho3D/UI/CheckBox.h>
@@ -101,6 +94,7 @@ public:
     std::unique_ptr<player> player_;
     float level_min_height=999999;          ///< When the player gets below this height, he dies.
     level current_level;
+    delayed_action_handler delayed_actions;
 
     gs_playing(std::string level_filename);
     void update(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);

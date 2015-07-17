@@ -119,11 +119,13 @@ player::player(Vector3 pos,game_state* gs)
         node_light=globals::instance()->scene->CreateChild();
         light=node_light->CreateComponent<Light>();
         light->SetLightType(LIGHT_SPOT);
-        light->SetRange(25);
+        light->SetRange(100);
         light->SetBrightness(1.5);
         light->SetColor(Color(1.0,1.0,1.0,1.0)*1);
         light->SetCastShadows(true);
         light->SetFov(40);
+        light->SetShapeTexture(globals::instance()->cache->GetResource<Texture2D>("Textures/flashlight.jpg"));
+        light->SetRampTexture(globals::instance()->cache->GetResource<Texture2D>("Textures/ramp_flashlight.png"));
     }
 
     {
@@ -138,12 +140,11 @@ player::player(Vector3 pos,game_state* gs)
         sound_source2->SetFarDistance(55);
         sound_source2->SetSoundType(SOUND_EFFECT);
 
-        sound_steam=globals::instance()->cache->GetResource<Sound>("Sounds/steam.ogg");
-        sound_steam->SetLooped(true);
-        sound_source_steam=node_model->CreateComponent<SoundSource3D>();
-        sound_source_steam->SetNearDistance(1);
-        sound_source_steam->SetFarDistance(55);
-        sound_source_steam->SetSoundType(SOUND_EFFECT);
+        sound_flashlight_button=globals::instance()->cache->GetResource<Sound>("Sounds/flashlight_button.ogg");
+        sound_source_flashlight_button=node_model->CreateComponent<SoundSource3D>();
+        sound_source_flashlight_button->SetNearDistance(1);
+        sound_source_flashlight_button->SetFarDistance(55);
+        sound_source_flashlight_button->SetSoundType(SOUND_EFFECT);
 
         sound_flag=globals::instance()->cache->GetResource<Sound>("Sounds/littlerobotsoundfactory__jingle-win-synth-04.ogg");
         sound_source_flag=node_model->CreateComponent<SoundSource3D>();
@@ -277,9 +278,6 @@ void player::update(Input* input,float timeStep)
             }
             if(jumping!=1)
                 jump_force_applied=0;
-
-            if(!emitter_foot_left->IsEmitting()&&sound_source_steam->IsPlaying())
-                sound_source_steam->Stop();
         }
 
         float f=0.5;    // for walking or sprinting
@@ -369,13 +367,13 @@ void player::update(Input* input,float timeStep)
 
     node_light->SetPosition(node_camera_pos->GetWorldPosition());
     node_light->Translate(Vector3(0.5,-0.9,0.3));
-    float yaw_360_correction=camera_yaw-light_yaw;
+    float yaw_360_correction=(camera_yaw+Random(-light_shaking,light_shaking))-light_yaw;
     if(yaw_360_correction>180)
         yaw_360_correction-=360;
     else if(yaw_360_correction<-180)
         yaw_360_correction+=360;
     light_yaw+=yaw_360_correction*(10*timeStep);
-    light_pitch+=(camera_pitch-light_pitch)*(10*timeStep);
+    light_pitch+=((camera_pitch+Random(-light_shaking,light_shaking))-light_pitch)*(10*timeStep);
     node_light->SetDirection(Vector3::FORWARD);
     node_light->Yaw(light_yaw);
     node_light->Pitch(light_pitch);
