@@ -474,12 +474,32 @@ void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
 
     if(key==KEY_L)
         spawn_torch(player_->node->GetPosition()+Vector3(2,1.9,0));
-    if(key==KEY_V)
+    else if(key==KEY_V)
         player_->camera_first_person=!player_->camera_first_person;
-    if(key==KEY_F)
+    else if(key==KEY_F)
     {
         player_->sound_source_flashlight_button->Play(player_->sound_flashlight_button);
         delayed_actions.insert(0.2,[this]{player_->light->SetBrightness(player_->light->GetBrightness()>0.5?0:1.5);});
+    }
+    else if(key==KEY_E)
+    {
+        Node* node=globals::instance()->scene->CreateChild();
+        nodes.push_back(node);
+
+        auto pos=player_->node->GetPosition()+Vector3(5,5,0);
+        PhysicsRaycastResult result;
+        Ray ray(pos,Vector3(0,-10,0));
+        globals::instance()->physical_world->SphereCast(result,ray,0.1,10);
+        if(result.distance_<=10)
+            pos=result.position_+Vector3(0,0.2,0);
+        node->SetPosition(pos);
+
+        StaticModel* boxObject=node->CreateComponent<StaticModel>();
+        set_model(boxObject,globals::instance()->cache,"Data/Models/merguns");
+        boxObject->SetCastShadows(true);
+        boxObject->SetOccludee(true);
+        boxObject->SetShadowDistance(200);
+        boxObject->SetDrawDistance(200);
     }
 }
 

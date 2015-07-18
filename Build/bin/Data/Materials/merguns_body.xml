@@ -1,0 +1,8 @@
+<material>
+    <technique name="Techniques/DiffNormal.xml"/>
+    <texture name="Textures/merguns_body_diff.jpg" unit="diffuse"/>
+    <texture name="Textures/merguns_body_norm.jpg" unit="normal"/>
+    <texture name="Textures/merguns_body_spec.jpg" unit="specular"/>
+    <parameter name="MatDiffColor" value="0.5 0.5 0.5 1"/>
+    <parameter name="MatSpecColor" value="0.1 0.1 0.1 150"/>
+</material>
