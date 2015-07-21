@@ -495,7 +495,7 @@ void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
     else if(key==KEY_F)
     {
         player_->sound_source_flashlight_button->Play(player_->sound_flashlight_button);
-        delayed_actions.insert(0.2,[this]{player_->light->SetBrightness(player_->light->GetBrightness()>0.5?0:1.5);});
+        delayed_actions.insert(0.02,[this]{player_->light->SetBrightness(player_->light->GetBrightness()>0.5?0:1.5);});
     }
     else if(key==KEY_E)
     {
