@@ -15,7 +15,8 @@ if (COMMAND cmake_policy)
   endif ()
 endif ()
 # Set CMake modules search path
-set (CMAKE_MODULE_PATH $ENV{URHO3D_HOME}/CMake/Modules CACHE PATH "Path to Urho3D-specific CMake modules")
+set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Modules)
+#(OLD LINE): set (CMAKE_MODULE_PATH $ENV{URHO3D_HOME}/CMake/Modules CACHE PATH "Path to Urho3D-specific CMake modules")
 # Include Urho3D Cmake common module
 include (Urho3D-CMake-common)
 # Find Urho3D library
