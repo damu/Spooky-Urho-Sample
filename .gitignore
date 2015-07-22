@@ -9,3 +9,6 @@ Build/*.dll.a
 Build/*.cbp
 Build/*.layout
 *.blend1
+*.kdev4
+*.swp
+*.swo
