@@ -87,9 +87,10 @@ gs_main_menu::gs_main_menu() : game_state()
             boxNode_->SetPosition(Vector3(x,-1.5,y));
             boxNode_->SetScale(Vector3(2,2,2));
             StaticModel* boxObject=boxNode_->CreateComponent<StaticModel>();
+            //set_model(boxObject,globals::instance()->cache,"Data/Models/merguns");
             boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/Box.mdl"));
             boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/Stone.xml"));
-            //boxObject->SetCastShadows(true);
+            boxObject->SetCastShadows(true);
         }
 
     // sun

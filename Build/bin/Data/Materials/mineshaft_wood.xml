@@ -1,0 +1,7 @@
+<material>
+	<technique name="Techniques/DiffNormal.xml"/>
+	<texture name="Textures/mineshaft_wood_diff.jpg" unit="diffuse"/>
+	<texture name="Textures/mineshaft_wood_norm.jpg" unit="normal"/>
+	<parameter name="MatDiffColor" value="0.5 0.5 0.5 1"/>
+	<parameter name="MatSpecColor" value="0.01 0.01 0.01 150"/>
+</material>

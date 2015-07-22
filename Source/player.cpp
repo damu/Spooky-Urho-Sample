@@ -120,7 +120,7 @@ player::player(Vector3 pos,game_state* gs)
         light=node_light->CreateComponent<Light>();
         light->SetLightType(LIGHT_SPOT);
         light->SetRange(100);
-        light->SetBrightness(1.5);
+        light->SetBrightness(1.2);
         light->SetColor(Color(1.0,1.0,1.0,1.0)*1);
         light->SetCastShadows(true);
         light->SetFov(40);
