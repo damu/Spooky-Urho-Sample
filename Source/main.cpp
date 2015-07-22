@@ -43,6 +43,8 @@
 #include "gs_main_menu.h"
 #include "gs_playing.h"
 
+#include "LuaScriptMod.h"
+
 using namespace Urho3D;
 
 /// USP main class mainly used for setup. The control is then given to the game states (starting with gs_main_menu).
@@ -65,6 +67,14 @@ public:
 
     virtual void Start()
     {
+        //Register the Lua mod API subsystem
+        context_->RegisterSubsystem(new LuaScriptMod(context_));
+        auto mod = context_->GetSubsystem<LuaScriptMod>();
+        mod->ExecuteFile("LuaScripts/NoUrho.lua");
+        auto func = mod->GetFunction("script_main");
+        func->BeginCall();
+        func->EndCall();
+
         ResourceCache* cache=GetSubsystem<ResourceCache>();
         GetSubsystem<UI>()->GetRoot()->SetDefaultStyle(cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
 
