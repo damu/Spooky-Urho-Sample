@@ -2,9 +2,9 @@
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/LuaScript/LuaFile.h>
 #include <Urho3D/LuaScript/LuaFunction.h>
-extern "C" 
+extern "C"
 {
-#include <lualib.h>
+#include <Urho3D/ThirdParty/LuaJIT/lualib.h>
 }
 #include <toluapp/tolua++.h>
 #include <Urho3D/LuaScript/ToluaUtils.h>
@@ -12,8 +12,6 @@ extern "C"
 namespace Urho3D {
     extern void RegisterLuaScriptLibrary(Context* context);
 }
-
-using namespace Urho3D;
 
 class LuaScriptMod : public Object
 {
@@ -28,7 +26,7 @@ public:
 
     /// Execute script string. Return true if successful.
     bool ExecuteString(const String& string);
-    
+
     /// Execute script function.
     bool ExecuteFunction(const String& functionName);
 
@@ -39,7 +37,7 @@ public:
     LuaFunction* GetFunction(const String& functionName, bool silentIfNotfound = false);
 
 private:
-     
+
     /// Replace print.
     void ReplacePrint();
 
