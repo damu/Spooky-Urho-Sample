@@ -109,7 +109,7 @@ void PS()
     weights.z/=sum;
 
     vec4 vWorldPos_currected=vWorldPos;
-    //vWorldPos_currected*=1;
+    vWorldPos_currected*=0.0625;
 
     #ifdef DIFFMAP
         vec4 diffColor=texture2D(sDiffMap,vWorldPos_currected.xy)*weights.z+  // project each of the three planes and blend together with the weights
