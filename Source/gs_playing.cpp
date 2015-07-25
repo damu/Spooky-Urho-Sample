@@ -352,6 +352,21 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
         CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
         shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_straight.mdl"));
     }
+
+    {
+        Node* boxNode_=globals::instance()->scene->CreateChild("Box");
+        nodes.push_back(boxNode_);
+        boxNode_->SetPosition(Vector3(120,4,20));
+        boxNode_->SetScale(Vector3(1,1,1));
+        StaticModel* boxObject=boxNode_->CreateComponent<StaticModel>();
+        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_curve45");
+        boxObject->SetCastShadows(true);
+
+        RigidBody* body=boxNode_->CreateComponent<RigidBody>();
+        body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
+        CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
+        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_curve45.mdl"));
+    }
 }
 
 void gs_playing::update(StringHash eventType,VariantMap& eventData)
