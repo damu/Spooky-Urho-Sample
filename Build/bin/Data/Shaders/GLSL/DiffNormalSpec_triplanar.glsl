@@ -134,12 +134,13 @@ void PS()
         vec3 specColor=cMatSpecColor.rgb;
     #endif
 
-    #ifdef NORMALMAP
+    #ifdef NORMALMAPf
         vec4 normColor=texture2D(sNormalMap,vWorldPos_currected.xy)*weights.z+  // project each of the three planes and blend together with the weights
                        texture2D(sNormalMap,vWorldPos_currected.yz)*weights.x+
                        texture2D(sNormalMap,vWorldPos_currected.xz)*weights.y;
         mat3 tbn=mat3(vTangent.xyz, vec3(vTexCoord.zw,vTangent.w), vNormal);
         vec3 normal=normalize(tbn * DecodeNormal(normColor));
+        //vec3 normal=normalize(vNormal+(DecodeNormal(normColor)));
     #else
         vec3 normal=normalize(vNormal);
     #endif
