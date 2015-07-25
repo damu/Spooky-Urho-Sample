@@ -353,12 +353,16 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
         shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_straight.mdl"));
     }
 
+    Vector3 offset(120,4,20);
+    //Vector3 rotation=Vector3::FORWARD;
+    for(int i=0;i<3;i++)
     {
         Node* boxNode_=globals::instance()->scene->CreateChild("Box");
         nodes.push_back(boxNode_);
-        boxNode_->SetPosition(Vector3(120,4,20));
+        boxNode_->SetWorldPosition(offset);
         boxNode_->SetScale(Vector3(1,1,1));
-        StaticModel* boxObject=boxNode_->CreateComponent<StaticModel>();
+        //boxNode_->SetDirection(rotation);
+        AnimatedModel* boxObject=boxNode_->CreateComponent<AnimatedModel>();
         set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_curve45");
         boxObject->SetCastShadows(true);
 
@@ -366,6 +370,9 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
         body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
         CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
         shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_curve45.mdl"));
+
+        offset=boxNode_->GetChild("dock_mineshaft_0",true)->GetWorldPosition()-boxNode_->GetChild("dock_mineshaft_1",true)->GetPosition();
+        //rotation=boxNode_->GetChild("dock_mineshaft_0",true)->GetDirection()-boxNode_->GetChild("dock_mineshaft_1",true)->GetDirection();
     }
 }
 
