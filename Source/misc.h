@@ -157,4 +157,18 @@ public:
     }
 };
 
+/** \brief Sets the position and rotation of the given node_to_move Node in a way that the bone with the name
+ * bone_name_to_move it at the position of the bone with the namebone_name_to_move_to of the bone_name_to_move_to Node.
+**/
+inline void move_bone_to_bone(Urho3D::Node* node_to_move,const Urho3D::String& bone_name_to_move,Urho3D::Node* node_to_move_to,const Urho3D::String& bone_name_to_move_to)
+{
+    node_to_move->SetPosition(node_to_move_to->GetChild(bone_name_to_move_to,true)->GetWorldPosition());
+    Urho3D::Vector3 bone_a_rot=node_to_move_to->GetChild(bone_name_to_move_to,true)->GetWorldRotation().EulerAngles();
+    Urho3D::Vector3 bone_b_rot=node_to_move->GetChild(bone_name_to_move,true)->GetWorldRotation().EulerAngles();
+    node_to_move->Yaw(bone_b_rot.z_-bone_a_rot.z_+180);
+    node_to_move->Pitch(bone_b_rot.x_-bone_a_rot.x_);
+    node_to_move->Roll(bone_b_rot.y_-bone_a_rot.y_);
+    node_to_move->Translate(-node_to_move->GetChild(bone_name_to_move,true)->GetPosition());
+}
+
 #endif // MISC_H
