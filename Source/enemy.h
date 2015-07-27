@@ -43,7 +43,7 @@ public:
     Urho3D::Sound* sound_step2;
     Urho3D::Vector3 wander_target=Urho3D::Vector3(Urho3D::Random(-100,100),0,Urho3D::Random(-100,100));
     timer wander_timer;
-    float wander_timeout=4+Urho3D::Random(0.0f,2.0f);
+    float wander_timeout=4+Urho3D::Random(0.0f,4.0f);
 
     enemy(Urho3D::Vector3 pos);
     ~enemy(){node->Remove();node_model->Remove();}

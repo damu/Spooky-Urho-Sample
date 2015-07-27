@@ -117,22 +117,28 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
             if(wander_timer.until_now()>wander_timeout)
             {
                 wander_timer.reset();
-                wander_timeout=4+Random(0.0f,2.0f);
-                wander_target=Vector3(Random(-100,100),0,Random(-100,100));
+                wander_timeout=4+Random(0.0f,4.0f);
+                if(Random(0.0f,100.0f)>25.0f)  // chance of 25% to stand around
+                    wander_target=Vector3(Random(-100,100),0,Random(-100,100));
+                else
+                    wander_target=node->GetWorldPosition();
             }
 
-            node_aim->LookAt(wander_target);
-            auto yaw_diff=rot.YawAngle()-node_aim->GetWorldRotation().YawAngle();
+            if((node->GetWorldPosition()-wander_target).Length()>2) // do nothing if target reached
+            {
+                node_aim->LookAt(wander_target);
+                auto yaw_diff=rot.YawAngle()-node_aim->GetWorldRotation().YawAngle();
 
-            if(yaw_diff>180)
-                yaw_diff-=360;
-            else if(yaw_diff<-180)
-                yaw_diff+=360;
+                if(yaw_diff>180)
+                    yaw_diff-=360;
+                else if(yaw_diff<-180)
+                    yaw_diff+=360;
 
-            if(yaw_diff<-5||yaw_diff>5)
-                body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*50,-300.0,300.0),0));
+                if(yaw_diff<-5||yaw_diff>5)
+                    body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*50,-300.0,300.0),0));
 
-            moveDir+=Vector3::FORWARD*1;
+                moveDir+=Vector3::FORWARD*1;
+            }
         }
 
         if(moveDir.Length()>0.1)
