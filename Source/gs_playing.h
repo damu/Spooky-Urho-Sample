@@ -2,6 +2,7 @@
 #define GS_PLAYING_H
 
 #include "game_state.h"
+#include "enemy.h"
 
 #include <Urho3D/Graphics/Light.h>
 #include <Urho3D/Graphics/Model.h>
@@ -66,7 +67,6 @@ class level
 public:
     std::vector<Urho3D::Vector3> torch_positions;
     std::vector<Urho3D::Vector3> flag_positions;
-    std::vector<level_rock_spawn> rock_spawns;
     std::vector<level_static_model> static_models;    ///< static level geometry like terrain and buildings. Will all get a triangle-mesh collider.
     Urho3D::Vector3 player_pos;
     Urho3D::String sound_name;
@@ -92,6 +92,7 @@ public:
     std::vector<Urho3D::Node*> flag_nodes;
     static std::string last_level_filename; ///< Used to restart the last played level (like from gs_level_end).
     std::unique_ptr<player> player_;
+    std::vector<std::unique_ptr<enemy>> enemies;
     float level_min_height=999999;          ///< When the player gets below this height, he dies.
     level current_level;
     delayed_action_handler delayed_actions;

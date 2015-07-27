@@ -7,7 +7,9 @@
 #include "gs_level_end.h"
 #include "gs_death.h"
 #include "player.h"
+#include "enemy.h"
 
+using namespace std;
 using namespace Urho3D;
 
 // it may be better to do file loading with the proper Urho functions which search all registered paths
@@ -118,40 +120,6 @@ level::level(std::string level_filename)
                 for(pugi::xml_attribute& attr:child.attributes())
                     if(std::string(attr.name())=="name")
                         sound_name=attr.value();
-            }
-            else if(name=="rock_spawner")
-            {
-                level_rock_spawn rs;
-                for(pugi::xml_attribute& attr:child.attributes())
-                {
-                    if(std::string(attr.name())=="rocks_pos_min_x")
-                        rs.spawn_area.min_.x_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="rocks_pos_min_y")
-                        rs.spawn_area.min_.y_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="rocks_pos_min_z")
-                        rs.spawn_area.min_.z_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="rocks_pos_max_x")
-                        rs.spawn_area.max_.x_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="rocks_pos_max_y")
-                        rs.spawn_area.max_.y_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="rocks_pos_max_z")
-                        rs.spawn_area.max_.z_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="trigger_pos_min_x")
-                        rs.trigger_area.min_.x_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="trigger_pos_min_y")
-                        rs.trigger_area.min_.y_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="trigger_pos_min_z")
-                        rs.trigger_area.min_.z_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="trigger_pos_max_x")
-                        rs.trigger_area.max_.x_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="trigger_pos_max_y")
-                        rs.trigger_area.max_.y_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="trigger_pos_max_z")
-                        rs.trigger_area.max_.z_=std::stof(std::string(attr.value()));
-                    else if(std::string(attr.name())=="rock_count")
-                        rs.rock_count=std::stoi(std::string(attr.value()));
-                }
-                rock_spawns.push_back(rs);
             }
         }
     }
@@ -444,6 +412,21 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
         move_bone_to_bone(boxNode_,"dock_mineshaft_1",last_world_part,"dock_mineshaft_0");
         last_world_part=boxNode_;
     }
+
+    // spawn some enemies
+    for(int i=0;i<10;i++)
+    {
+        PhysicsRaycastResult result;
+        Vector3 pos(0,10,0);
+        pos.x_=Random(-100,100);
+        pos.z_=Random(-100,100);
+        Ray ray(pos,Vector3(0,-1,0));
+        globals::instance()->physical_world->SphereCast(result,ray,2,200);
+        if(result.distance_<=1000)
+            pos=result.position_+Vector3(0,5,0);
+
+        enemies.emplace_back(new enemy(pos));
+    }
 }
 
 void gs_playing::update(StringHash eventType,VariantMap& eventData)
@@ -457,48 +440,6 @@ void gs_playing::update(StringHash eventType,VariantMap& eventData)
     float timeStep=eventData[Update::P_TIMESTEP].GetFloat();
     timer_playing+=timeStep;
 
-    // check if there should be rocks spawned due to a distance trigger
-    for(level_rock_spawn& rs:current_level.rock_spawns)
-    if(!rs.rocks_spawned&&rs.trigger_area.IsInside(player_->node->GetPosition()))
-    {
-        rs.rocks_spawned=true;
-        for(int i=0;i<rs.rock_count;i++)
-        {
-            auto node_stone=globals::instance()->scene->CreateChild("Stone");
-            nodes.push_back(node_stone);
-            StaticModel* boxObject=node_stone->CreateComponent<StaticModel>();
-            boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
-            boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/rock.xml"));
-            boxObject->SetCastShadows(true);
-            float s=1.0+Random(3.0f);
-            node_stone->SetScale(s);
-            boxObject->SetOccludee(true);
-            boxObject->SetDrawDistance(200);
-            boxObject->SetShadowDistance(200);
-
-            PhysicsRaycastResult result;
-            Vector3 pos;
-            pos.x_=Random(rs.spawn_area.min_.x_,rs.spawn_area.max_.x_);
-            pos.y_=Random(rs.spawn_area.min_.y_,rs.spawn_area.max_.y_);
-            pos.z_=Random(rs.spawn_area.min_.z_,rs.spawn_area.max_.z_);
-            Ray ray(pos,Vector3(0,-1,0));
-            globals::instance()->physical_world->SphereCast(result,ray,2,100);
-            if(result.distance_<=1000)
-                pos=result.position_+Vector3(0,5,0);
-
-            auto body_stone=node_stone->CreateComponent<RigidBody>();
-            body_stone->SetPosition(pos);
-            body_stone->SetCollisionLayer(2);
-            body_stone->SetMass(50.0*s*s);
-            body_stone->SetLinearDamping(0.2f);
-            body_stone->SetAngularDamping(0.2f);
-            //body_stone->SetAngularFactor(Vector3(0,1,0));
-            body_stone->SetFriction(0.6);
-            CollisionShape* shape=node_stone->CreateComponent<CollisionShape>();
-            //shape->SetCapsule(1,1.2);
-            shape->SetConvexHull(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
-        }
-    }
 std::string str;
     {
         static double last_second=0;
@@ -550,7 +491,7 @@ std::string str;
         n->Yaw(64*timeStep);
         if((player_pos-n->GetPosition()).Length()<2)
         {
-            player_->sound_source_flag->Play(player_->sound_flag);
+            //player_->sound_source_flag->Play(player_->sound_flag);
             flag_nodes.erase(flag_nodes.begin()+i);
             n->Remove();
             for(int j=0;j<nodes.size();j++)
@@ -606,31 +547,12 @@ void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
         delayed_actions.insert(0.02,[this]{player_->light->SetBrightness(player_->light->GetBrightness()>0.5?0:1.5);});
     }
     else if(key==KEY_E)
-    {
-        Node* node=globals::instance()->scene->CreateChild();
-        node->SetScale(0.5);
-        nodes.push_back(node);
-
-        auto pos=player_->node->GetPosition()+Vector3(5,0,0);
-        /*PhysicsRaycastResult result;
-        Ray ray(pos,Vector3(0,-10,0));
-        globals::instance()->physical_world->SphereCast(result,ray,0.1,10);
-        if(result.distance_<=10)
-            pos=result.position_+Vector3(0,0.0,0);*/
-        node->SetPosition(pos);
-
-        StaticModel* boxObject=node->CreateComponent<StaticModel>();
-        set_model(boxObject,globals::instance()->cache,"Data/Models/merguns");
-        boxObject->SetCastShadows(true);
-        boxObject->SetOccludee(true);
-        boxObject->SetShadowDistance(200);
-        boxObject->SetDrawDistance(200);
-    }
+        enemies.emplace_back(new enemy(player_->node->GetPosition()+Vector3(5,2,0)));
 }
 
 void gs_playing::spawn_torch(Vector3 pos)
 {
-    Node* node=globals::instance()->scene->CreateChild("Light");
+    Node* node=globals::instance()->scene->CreateChild();
     nodes.push_back(node);
 
     PhysicsRaycastResult result;

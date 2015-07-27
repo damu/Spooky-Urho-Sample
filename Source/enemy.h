@@ -1,0 +1,55 @@
+#ifndef ENEMY_H
+#define ENEMY_H
+
+//#include "gs_playing.h"
+#include "game_state.h"
+
+#include <Urho3D/Urho3D.h>
+#include <Urho3D/Engine/Application.h>
+#include <Urho3D/Engine/Engine.h>
+#include <Urho3D/Core/CoreEvents.h>
+#include <Urho3D/Core/Context.h>
+#include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Resource/ResourceCache.h>
+#include <Urho3D/Physics/PhysicsEvents.h>
+#include <Urho3D/Physics/RigidBody.h>
+#include <Urho3D/Physics/CollisionShape.h>
+#include <Urho3D/Physics/PhysicsWorld.h>
+#include <Urho3D/Audio/Sound.h>
+#include <Urho3D/Audio/SoundSource3D.h>
+#include <Urho3D/Graphics/Model.h>
+#include <Urho3D/Graphics/StaticModel.h>
+#include <Urho3D/Graphics/Animation.h>
+#include <Urho3D/Graphics/AnimatedModel.h>
+#include <Urho3D/Graphics/AnimationState.h>
+
+/// \brief Creates and manages an enemy.
+class enemy : public Urho3D::Object
+{
+public:
+    Urho3D::Vector3 pos_last;
+    /*Urho3D::AnimationState* as_stand;
+    Urho3D::AnimationState* as_walk;
+    Urho3D::AnimationState* as_run;
+    Urho3D::AnimationState* as_jump;*/
+    Urho3D::Node* node;
+    Urho3D::Node* node_model;
+    Urho3D::Node* node_aim;     ///< for aiming
+    Urho3D::Node* node_target=0;
+    Urho3D::RigidBody* body;
+    Urho3D::SoundSource3D* sound_source1;
+    Urho3D::SoundSource3D* sound_source2;
+    Urho3D::Sound* sound_step1;
+    Urho3D::Sound* sound_step2;
+
+    enemy(Urho3D::Vector3 pos);
+    ~enemy(){node->Remove();node_model->Remove();}
+    void update(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
+
+    // these three functions need to be here because of Urho3D::Object
+    virtual Urho3D::StringHash GetType() const {return GetTypeName();}
+    virtual Urho3D::StringHash GetBaseType() const {return GetTypeName();}
+    virtual const Urho3D::String& GetTypeName() const {static Urho3D::String name("enemy");return name;}
+};
+
+#endif // PLAYER_H

@@ -26,6 +26,7 @@ public:
     Urho3D::UIElement* ui_root=0;
     Urho3D::Engine* engine=0;
     Urho3D::PhysicsWorld* physical_world=0;
+    Urho3D::Node* player_node=0;    // maybe only temporary, for letting the enemies follow the player
 
     /// The current game states, so that game states can switch to another game state.
     /// Watch out that changing a game state will delete the current one.
