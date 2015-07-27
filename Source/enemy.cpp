@@ -74,6 +74,7 @@ enemy::enemy(Vector3 pos) : Object(globals::instance()->context)
 void enemy::update(StringHash eventType,VariantMap& eventData)
 {
     node_target=globals::instance()->player_node;
+    Vector3 target_position=node_target->GetWorldPosition();
     float timeStep=eventData[Update::P_TIMESTEP].GetFloat();
 
     {
@@ -92,10 +93,13 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
 
         Vector3 vel=body->GetLinearVelocity()*Vector3(1,0,1);
         Quaternion rot=body->GetRotation();
+        float movement_speed=0.3;
 
-        if((node->GetWorldPosition()-node_target->GetWorldPosition()).Length()<30)  // if player is close, approach him
+        // if the player is close, approach him
+        if((node->GetWorldPosition()-globals::instance()->player_node->GetWorldPosition()).Length()<50)
         {
-            node_aim->LookAt(node_target->GetWorldPosition());
+            movement_speed=0.9;
+            node_aim->LookAt(target_position);
             auto yaw_diff=rot.YawAngle()-node_aim->GetWorldRotation().YawAngle();
 
             if(yaw_diff>180)
@@ -105,6 +109,28 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
 
             if(yaw_diff<-5||yaw_diff>5)
                 body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*100,-1500.0,1500.0),0));
+
+            moveDir+=Vector3::FORWARD*1;
+        }
+        else    // or wander around randomly
+        {
+            if(wander_timer.until_now()>wander_timeout)
+            {
+                wander_timer.reset();
+                wander_timeout=4+Random(0.0f,2.0f);
+                wander_target=Vector3(Random(-100,100),0,Random(-100,100));
+            }
+
+            node_aim->LookAt(wander_target);
+            auto yaw_diff=rot.YawAngle()-node_aim->GetWorldRotation().YawAngle();
+
+            if(yaw_diff>180)
+                yaw_diff-=360;
+            else if(yaw_diff<-180)
+                yaw_diff+=360;
+
+            if(yaw_diff<-5||yaw_diff>5)
+                body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*50,-300.0,300.0),0));
 
             moveDir+=Vector3::FORWARD*1;
         }
@@ -197,13 +223,12 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
                 jump_force_applied=0;*/
         }
 
-        float f=0.5;    // for walking or sprinting
 //        if(input->GetKeyDown(KEY_SHIFT))
-//            f=1.0;
+//            movement_speed=1.0;
         float speed_old=vel.Length();
-        vel+=rot*moveDir*timeStep*4000*f/body->GetMass();
+        vel+=rot*moveDir*timeStep*4000*movement_speed/body->GetMass();
         float speed_new=vel.Length();
-        if(speed_new>10*f&&speed_new>speed_old)   // over limit. Don't increase speed further but make direction change possible.
+        if(speed_new>10*movement_speed&&speed_new>speed_old)   // over limit. Don't increase speed further but make direction change possible.
             vel=vel.Normalized()*speed_old;
         body->SetLinearVelocity(Vector3(vel.x_,body->GetLinearVelocity().y_+(rot*moveDir*timeStep*4500/body->GetMass()).y_,vel.z_));
         body->ApplyImpulse(moveDir_global*timeStep*4000);

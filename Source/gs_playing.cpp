@@ -414,7 +414,7 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
     }
 
     // spawn some enemies
-    for(int i=0;i<10;i++)
+    for(int i=0;i<20;i++)
     {
         PhysicsRaycastResult result;
         Vector3 pos(0,10,0);
