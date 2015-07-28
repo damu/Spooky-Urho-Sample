@@ -5,12 +5,7 @@
 #include "Lighting.glsl"
 #include "Fog.glsl"
 
-#ifdef NORMALMAP
-    varying vec4 vTexCoord;
-    varying vec4 vTangent;
-#else
-    varying vec2 vTexCoord;
-#endif
+varying vec2 vTexCoord;
 varying vec3 vNormal;
 varying vec4 vWorldPos;
 #ifdef VERTEXCOLOR
@@ -49,14 +44,7 @@ void VS()
         vColor = iColor;
     #endif
 
-    #ifdef NORMALMAP
-        vec3 tangent = GetWorldTangent(modelMatrix);
-        vec3 bitangent = cross(tangent, vNormal) * iTangent.w;
-        vTexCoord = vec4(GetTexCoord(iTexCoord), bitangent.xy);
-        vTangent = vec4(tangent, bitangent.z);
-    #else
-        vTexCoord = GetTexCoord(iTexCoord);
-    #endif
+    vTexCoord=GetTexCoord(iTexCoord);
 
     #ifdef PERPIXEL
         // Per-pixel forward lighting
@@ -134,13 +122,28 @@ void PS()
         vec3 specColor=cMatSpecColor.rgb;
     #endif
 
-    #ifdef NORMALMAPf
+    #ifdef NORMALMAP
         vec4 normColor=texture2D(sNormalMap,vWorldPos_currected.xy)*weights.z+  // project each of the three planes and blend together with the weights
                        texture2D(sNormalMap,vWorldPos_currected.yz)*weights.x+
                        texture2D(sNormalMap,vWorldPos_currected.xz)*weights.y;
-        mat3 tbn=mat3(vTangent.xyz, vec3(vTexCoord.zw,vTangent.w), vNormal);
+
+        // based on http://www.ozone3d.net/tutorials/mesh_deformer_p2.php#tangent_space
+        vec3 tangent;
+        vec3 binormal;
+        vec3 c1 = cross(vNormal.xyz,vec3(0.0, 0.0, 1.0));
+        vec3 c2 = cross(vNormal.xyz,vec3(0.0, 1.0, 0.0));
+        //if(length(c1)>length(c2))  // this gives bad results
+        //    tangent = c1;
+        //else
+        //    tangent = c2;
+        tangent=c1; // quite incorrect but less ugly
+        tangent = normalize(tangent);
+        binormal = cross(vNormal.xyz,tangent);
+        binormal = normalize(binormal);
+
+
+        mat3 tbn=mat3(tangent.xyz, binormal.xyz, vNormal);
         vec3 normal=normalize(tbn * DecodeNormal(normColor));
-        //vec3 normal=normalize(vNormal+(DecodeNormal(normColor)));
     #else
         vec3 normal=normalize(vNormal);
     #endif
