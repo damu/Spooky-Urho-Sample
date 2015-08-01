@@ -45,7 +45,7 @@ public:
 class game_state : public Urho3D::Object
 {
 public:
-    std::vector<Urho3D::Node*> nodes;   ///< Put all your nodes in this vector so that they are removed on game state deletion.
+    std::vector<Urho3D::SharedPtr<Urho3D::Node>> nodes;   ///< Put all your nodes in this vector so that they are removed on game state deletion.
     std::vector<Urho3D::UIElement*> gui_elements;   ///< Put all your GUI elements here so that they are removed on game state deletion.
     // there could be other vectors here with stuff that will be automatically removed in the destructor
 

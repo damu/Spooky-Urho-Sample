@@ -5,10 +5,10 @@ using namespace Urho3D;
 player::player(Vector3 pos,game_state* gs)
 {
     node=globals::instance()->scene->CreateChild("Player");
-    gs->nodes.push_back(node);
+    gs->nodes.emplace_back(node);
     globals::instance()->player_node=node;
     node_model=globals::instance()->scene->CreateChild();
-    gs->nodes.push_back(node_model);
+    gs->nodes.emplace_back(node_model);
 
     AnimatedModel* boxObject=node_model->CreateComponent<AnimatedModel>();
     set_model(boxObject,globals::instance()->cache,"Data/Models/robot");

@@ -3,6 +3,7 @@
 
 #include "game_state.h"
 #include "enemy.h"
+#include "world_part.h"
 
 #include <Urho3D/Graphics/Light.h>
 #include <Urho3D/Graphics/Model.h>
@@ -93,6 +94,7 @@ public:
     static std::string last_level_filename; ///< Used to restart the last played level (like from gs_level_end).
     std::unique_ptr<player> player_;
     std::vector<std::unique_ptr<enemy>> enemies;
+    std::vector<world_part> world_parts;
     float level_min_height=999999;          ///< When the player gets below this height, he dies.
     level current_level;
     delayed_action_handler delayed_actions;

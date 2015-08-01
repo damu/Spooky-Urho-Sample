@@ -14,7 +14,7 @@ gs_main_menu::gs_main_menu() : game_state()
     //if(false)
     {
         node_rotating_flag=globals::instance()->scene->CreateChild("Flag");
-        nodes.push_back(node_rotating_flag);
+        nodes.emplace_back(node_rotating_flag);
         node_rotating_flag->SetPosition(Vector3(0,-0.5,6));
         StaticModel* boxObject=node_rotating_flag->CreateComponent<StaticModel>();
         boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/flag.mdl"));
@@ -30,7 +30,7 @@ gs_main_menu::gs_main_menu() : game_state()
     // skybox
     {
         Node* skyNode=globals::instance()->scene->CreateChild("Sky");
-        nodes.push_back(skyNode);
+        nodes.emplace_back(skyNode);
         skyNode->SetScale(1500.0f);
         Skybox* skybox=skyNode->CreateComponent<Skybox>();
         skybox->SetModel(globals::instance()->cache->GetResource<Model>("Models/Box.mdl"));
@@ -41,7 +41,7 @@ gs_main_menu::gs_main_menu() : game_state()
     if(false)
     {
         Node* node=globals::instance()->scene->CreateChild("Light");
-        nodes.push_back(node);
+        nodes.emplace_back(node);
         Vector3 pos(Vector3(3,-0.5,6));
         node->SetPosition(pos);
 
@@ -84,7 +84,7 @@ gs_main_menu::gs_main_menu() : game_state()
         for(int y=-30;y<30;y+=3)
         {
             Node* boxNode_=globals::instance()->scene->CreateChild("Box");
-            nodes.push_back(boxNode_);
+            nodes.emplace_back(boxNode_);
             boxNode_->SetPosition(Vector3(x,-3,y));
             boxNode_->SetScale(Vector3(3,3,3));
             StaticModel* boxObject=boxNode_->CreateComponent<StaticModel>();
@@ -97,7 +97,7 @@ gs_main_menu::gs_main_menu() : game_state()
     // sun
     {
         node_sun=globals::instance()->scene->CreateChild("Light");
-        nodes.push_back(node_sun);
+        nodes.emplace_back(node_sun);
         Light* light=node_sun->CreateComponent<Light>();
         light->SetLightType(LIGHT_DIRECTIONAL);
         light->SetCastShadows(true);
