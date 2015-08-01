@@ -100,14 +100,8 @@ public:
         //effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/Blur_radial.xml"));
         //effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/BloomHDR.xml"));
         effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/BloomHDR_r2.xml"));
-        //effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/BloomHDR_r4.xml"));
-        //effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/BloomHDR_r8.xml"));
-        //effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/BloomHDR_r16.xml"));
-        //effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/BloomHDR_r32.xml"));
-        //effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/BloomHDR_r64.xml"));
         //effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/ColorCorrection.xml"));
         effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/FXAA2.xml"));
-        //effectRenderPath.SetEnabled("GammaCorrection",false);
 
         Node* zoneNode=scene_->CreateChild("Zone");
         Zone* zone=zoneNode->CreateComponent<Zone>();

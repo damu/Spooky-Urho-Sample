@@ -289,53 +289,20 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
 
     timer_playing=0;
 
-    for(int y=-60;y<120;y+=20)
-    {
-        Node* boxNode_=globals::instance()->scene->CreateChild("Box");
-        nodes.push_back(boxNode_);
-        boxNode_->SetPosition(Vector3(y*0.8,8,0));
-        boxNode_->SetScale(Vector3(0.8,0.5,0.8));
-        StaticModel* boxObject=boxNode_->CreateComponent<StaticModel>();
-        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_straight_with_bars");
-        boxObject->SetCastShadows(true);
-
-        RigidBody* body=boxNode_->CreateComponent<RigidBody>();
-        body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
-        CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_straight_with_bars.mdl"));
-    }
-
-    for(int y=-60;y<120;y+=20)
-    {
-        Node* boxNode_=globals::instance()->scene->CreateChild("Box");
-        nodes.push_back(boxNode_);
-        boxNode_->SetPosition(Vector3(y*1,8,10));
-        boxNode_->SetScale(Vector3(1,1,1));
-        StaticModel* boxObject=boxNode_->CreateComponent<StaticModel>();
-        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_straight");
-        boxObject->SetCastShadows(true);
-
-        RigidBody* body=boxNode_->CreateComponent<RigidBody>();
-        body->SetCollisionLayer(2); // Use layer bitmask 2 for static geometry
-        CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_straight.mdl"));
-    }
-
     Node* last_world_part=0;
-    for(int i=0;i<5;i++)
+    for(int i=0;i<1;i++)
     {
         Node* boxNode_=globals::instance()->scene->CreateChild();
         nodes.push_back(boxNode_);
-        boxNode_->SetScale(Vector3(1,1,1));
         boxNode_->SetPosition(Vector3(100,8,20));
         AnimatedModel* boxObject=boxNode_->CreateComponent<AnimatedModel>();
-        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_curve45");
+        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_curve_90");
         boxObject->SetCastShadows(true);
 
         RigidBody* body=boxNode_->CreateComponent<RigidBody>();
         body->SetCollisionLayer(2);     // Use layer bitmask 2 for static geometry
         CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_curve45.mdl"));
+        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_curve_90.mdl"));
 
         if(last_world_part)
             move_bone_to_bone(boxNode_,"dock_mineshaft_0",last_world_part,"dock_mineshaft_1");
@@ -345,15 +312,14 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
     {
         Node* boxNode_=globals::instance()->scene->CreateChild();
         nodes.push_back(boxNode_);
-        boxNode_->SetScale(Vector3(1,1,1));
         AnimatedModel* boxObject=boxNode_->CreateComponent<AnimatedModel>();
-        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_curve45");
+        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_curve_90");
         boxObject->SetCastShadows(true);
 
         RigidBody* body=boxNode_->CreateComponent<RigidBody>();
         body->SetCollisionLayer(2);     // Use layer bitmask 2 for static geometry
         CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_curve45.mdl"));
+        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_curve_90.mdl"));
 
         move_bone_to_bone(boxNode_,"dock_mineshaft_1",last_world_part,"dock_mineshaft_1");
         last_world_part=boxNode_;
@@ -363,25 +329,23 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
     {
         Node* boxNode_=globals::instance()->scene->CreateChild();
         nodes.push_back(boxNode_);
-        boxNode_->SetScale(Vector3(1,1,1));
         AnimatedModel* boxObject=boxNode_->CreateComponent<AnimatedModel>();
-        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_curve45");
+        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_cross");
         boxObject->SetCastShadows(true);
 
         RigidBody* body=boxNode_->CreateComponent<RigidBody>();
         body->SetCollisionLayer(2);     // Use layer bitmask 2 for static geometry
         CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_curve45.mdl"));
+        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_cross.mdl"));
 
         move_bone_to_bone(boxNode_,"dock_mineshaft_1",last_world_part,"dock_mineshaft_0");
         last_world_part=boxNode_;
     }
 
-    for(int i=0;i<4;i++)
+    for(int i=0;i<2;i++)
     {
         Node* boxNode_=globals::instance()->scene->CreateChild();
         nodes.push_back(boxNode_);
-        boxNode_->SetScale(Vector3(1,1,1));
         AnimatedModel* boxObject=boxNode_->CreateComponent<AnimatedModel>();
         set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_straight");
         boxObject->SetCastShadows(true);
@@ -395,21 +359,36 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
         last_world_part=boxNode_;
     }
 
-    for(int i=0;i<4;i++)
     {
         Node* boxNode_=globals::instance()->scene->CreateChild();
         nodes.push_back(boxNode_);
-        boxNode_->SetScale(Vector3(1,1,1));
         AnimatedModel* boxObject=boxNode_->CreateComponent<AnimatedModel>();
-        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_straight_with_bars");
+        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_straight");
         boxObject->SetCastShadows(true);
 
         RigidBody* body=boxNode_->CreateComponent<RigidBody>();
         body->SetCollisionLayer(2);     // Use layer bitmask 2 for static geometry
         CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_straight_with_bars.mdl"));
+        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_straight.mdl"));
 
-        move_bone_to_bone(boxNode_,"dock_mineshaft_1",last_world_part,"dock_mineshaft_0");
+        move_bone_to_bone(boxNode_,"dock_mineshaft_0",last_world_part,"dock_mineshaft_0");
+        last_world_part=boxNode_;
+    }
+
+    for(int i=0;i<4;i++)
+    {
+        Node* boxNode_=globals::instance()->scene->CreateChild();
+        nodes.push_back(boxNode_);
+        AnimatedModel* boxObject=boxNode_->CreateComponent<AnimatedModel>();
+        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_ramp");
+        boxObject->SetCastShadows(true);
+
+        RigidBody* body=boxNode_->CreateComponent<RigidBody>();
+        body->SetCollisionLayer(2);     // Use layer bitmask 2 for static geometry
+        CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
+        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_ramp.mdl"));
+
+        move_bone_to_bone(boxNode_,"dock_mineshaft_0",last_world_part,"dock_mineshaft_1");
         last_world_part=boxNode_;
     }
 

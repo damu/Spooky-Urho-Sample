@@ -11,6 +11,7 @@ gs_main_menu::gs_main_menu() : game_state()
     node_camera->SetDirection(Vector3::FORWARD);
 
     // a rotating flag
+    //if(false)
     {
         node_rotating_flag=globals::instance()->scene->CreateChild("Flag");
         nodes.push_back(node_rotating_flag);
@@ -21,8 +22,7 @@ gs_main_menu::gs_main_menu() : game_state()
         boxObject->SetMaterial(1,globals::instance()->cache->GetResource<Material>("Materials/flag_cloth.xml"));
         boxObject->SetCastShadows(true);
 
-        ParticleEmitter* emitter=node_rotating_flag->CreateComponent<ParticleEmitter>();
-        emitter->SetEffect(globals::instance()->cache->GetResource<ParticleEffect>("Particle/flag.xml"));
+        //node_rotating_flag->CreateComponent<ParticleEmitter>()->SetEffect(globals::instance()->cache->GetResource<ParticleEffect>("Particle/flag.xml"));
 
         globals::instance()->physical_world=node_rotating_flag->CreateComponent<RigidBody>()->GetPhysicsWorld();    // there may be better ways to get the physical world object
     }
@@ -38,6 +38,7 @@ gs_main_menu::gs_main_menu() : game_state()
     }
 
     // a torch with a light, sound and particle effects
+    if(false)
     {
         Node* node=globals::instance()->scene->CreateChild("Light");
         nodes.push_back(node);
@@ -56,7 +57,7 @@ gs_main_menu::gs_main_menu() : game_state()
         Light* light=lightNode->CreateComponent<Light>();
         light->SetLightType(LIGHT_POINT);
         light->SetRange(50);
-        light->SetBrightness(1.0);
+        light->SetBrightness(0.1);
         light->SetColor(Color(1.0,0.6,0.3,1.0));
         light->SetCastShadows(true);
         light->SetShadowDistance(200);
@@ -84,33 +85,33 @@ gs_main_menu::gs_main_menu() : game_state()
         {
             Node* boxNode_=globals::instance()->scene->CreateChild("Box");
             nodes.push_back(boxNode_);
-            boxNode_->SetPosition(Vector3(x,-1.5,y));
-            boxNode_->SetScale(Vector3(2,2,2));
+            boxNode_->SetPosition(Vector3(x,-3,y));
+            boxNode_->SetScale(Vector3(3,3,3));
             StaticModel* boxObject=boxNode_->CreateComponent<StaticModel>();
             //set_model(boxObject,globals::instance()->cache,"Data/Models/merguns");
             boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/Box.mdl"));
-            boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/Stone.xml"));
+            boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/ParallaxStonesDemoVer.xml"));
             boxObject->SetCastShadows(true);
         }
 
     // sun
     {
-        Node* lightNode=globals::instance()->scene->CreateChild("Light");
-        nodes.push_back(lightNode);
-        Light* light=lightNode->CreateComponent<Light>();
+        node_sun=globals::instance()->scene->CreateChild("Light");
+        nodes.push_back(node_sun);
+        Light* light=node_sun->CreateComponent<Light>();
         light->SetLightType(LIGHT_DIRECTIONAL);
         light->SetCastShadows(true);
-        light->SetShadowBias(BiasParameters(0.00000025f,0.1f));
-        light->SetShadowCascade(CascadeParameters(20.0f,60.0f,180.0f,560.0f,100.0f,100.0f));
+        light->SetShadowBias(BiasParameters(0.000000025f,0.01f));
+        light->SetShadowCascade(CascadeParameters(2.0f,6.0f,18.0f,56.0f,100.0f,100.0f));
         light->SetShadowResolution(1.0);
-        light->SetBrightness(1.0);
-        light->SetColor(Color(1.0,0.6,0.3,1));
-        lightNode->SetDirection(Vector3::FORWARD);
-        lightNode->Yaw(-150);   // horizontal
-        lightNode->Pitch(30);   // vertical
-        lightNode->Translate(Vector3(0,0,-20000));
+        light->SetBrightness(0.8);
+        light->SetColor(Color(1.0,1.0,1.0,1));
+        node_sun->SetDirection(Vector3::FORWARD);
+        node_sun->Yaw(-150);   // horizontal
+        node_sun->Pitch(30);   // vertical
+        node_sun->Translate(Vector3(0,0,-20000));
 
-        BillboardSet* billboardObject=lightNode->CreateComponent<BillboardSet>();
+        BillboardSet* billboardObject=node_sun->CreateComponent<BillboardSet>();
         billboardObject->SetNumBillboards(1);
         billboardObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/sun.xml"));
         billboardObject->SetSorted(true);
@@ -209,10 +210,19 @@ void gs_main_menu::update(StringHash eventType,VariantMap& eventData)
 {
     float timeStep=eventData[Update::P_TIMESTEP].GetFloat();
 
-    node_rotating_flag->Rotate(Quaternion(0,64*timeStep,0));
+    if(node_rotating_flag)
+        node_rotating_flag->Rotate(Quaternion(0,64*timeStep,0));
+
+    node_sun->SetPosition(Vector3(0,0,0));
+    node_sun->SetDirection(Vector3::FORWARD);
+    static float sun_yaw=0;
+    sun_yaw+=timeStep*10;
+    node_sun->Yaw(sun_yaw);   // horizontal
+    node_sun->Pitch(30);   // vertical
+    node_sun->Translate(Vector3(0,0,-20000));
 
     // Movement speed as world units per second
-    float MOVE_SPEED=10.0f;
+    float MOVE_SPEED=1.0f;
     // Mouse sensitivity as degrees per pixel
     const float MOUSE_SENSITIVITY=0.1f;
 
@@ -220,7 +230,7 @@ void gs_main_menu::update(StringHash eventType,VariantMap& eventData)
     Input* input=GetSubsystem<Input>();
     Node* cameraNode_=globals::instance()->camera->GetNode();
     if(input->GetQualifierDown(1))  // 1 is shift, 2 is ctrl, 4 is alt
-        MOVE_SPEED*=10;
+        MOVE_SPEED*=20;
     if(input->GetKeyDown('W'))
         cameraNode_->Translate(Vector3(0,0, 1)*MOVE_SPEED*timeStep);
     if(input->GetKeyDown('S'))
@@ -229,6 +239,10 @@ void gs_main_menu::update(StringHash eventType,VariantMap& eventData)
         cameraNode_->Translate(Vector3(-1,0,0)*MOVE_SPEED*timeStep);
     if(input->GetKeyDown('D'))
         cameraNode_->Translate(Vector3( 1,0,0)*MOVE_SPEED*timeStep);
+    if(input->GetKeyDown('Q'))
+        cameraNode_->Translate(Vector3(0,-1,0)*MOVE_SPEED*timeStep);
+    if(input->GetKeyDown('E'))
+        cameraNode_->Translate(Vector3(0,1,0)*MOVE_SPEED*timeStep);
 
     if(!GetSubsystem<Input>()->IsMouseVisible())
     {
@@ -255,9 +269,9 @@ void gs_main_menu::update(StringHash eventType,VariantMap& eventData)
         String s=t->GetVar("filename").GetString();
         s=s.Substring(0,s.FindLast('.'));
         if(lv_levels->IsSelected(i))
-            t->SetText("-> "+s+" ("+std::to_string(highscores.get((t->GetVar("filename").GetString()+".xml").CString())).c_str()+"s)");
+            t->SetText("-> "+s);
         else
-            t->SetText("   "+s+" ("+std::to_string(highscores.get((t->GetVar("filename").GetString()+".xml").CString())).c_str()+"s)");
+            t->SetText("   "+s);
     }
 }
 
