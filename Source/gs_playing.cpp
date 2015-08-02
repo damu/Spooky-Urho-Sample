@@ -123,6 +123,66 @@ level::level(std::string level_filename)
             }
         }
     }
+
+    {
+        world_part* last_wp=0;
+        {
+            world_part wp(this,"mineshaft_curve_90",Vector3(0,50,0));
+            world_parts.push_back(wp);
+            last_wp=&world_parts[world_parts.size()-1];
+        }
+
+        {
+            world_part wp(this,"mineshaft_curve_90");
+            wp.move_to_docking_point("dock_mineshaft_1",*last_wp,"dock_mineshaft_1");
+            world_parts.push_back(wp);
+            last_wp=&world_parts[world_parts.size()-1];
+        }
+
+        for(int i=0;i<4;i++)
+        {
+            world_part wp(this,"mineshaft_cross");
+            wp.move_to_docking_point("dock_mineshaft_1",*last_wp,"dock_mineshaft_0");
+            world_parts.push_back(wp);
+            last_wp=&world_parts[world_parts.size()-1];
+        }
+
+        for(int i=0;i<2;i++)
+        {
+            world_part wp(this,"mineshaft_straight");
+            wp.move_to_docking_point("dock_mineshaft_1",*last_wp,"dock_mineshaft_0");
+            world_parts.push_back(wp);
+            last_wp=&world_parts[world_parts.size()-1];
+        }
+
+        {
+            world_part wp(this,"mineshaft_straight");
+            wp.move_to_docking_point("dock_mineshaft_0",*last_wp,"dock_mineshaft_0");
+            world_parts.push_back(wp);
+            last_wp=&world_parts[world_parts.size()-1];
+        }
+
+        for(int i=0;i<4;i++)
+        {
+            world_part wp(this,"mineshaft_ramp");
+            wp.move_to_docking_point("dock_mineshaft_0",*last_wp,"dock_mineshaft_1");
+            world_parts.push_back(wp);
+            last_wp=&world_parts[world_parts.size()-1];
+        }
+
+        int wp_count=world_parts.size();
+        for(int i=0;i<wp_count;i++)
+        {
+            world_part wp=world_parts[i];   // WEIRD: if I don't make a copy here (aka pointer or reference) wp is sometimes broken. Via value this works.
+            for(string dp:wp.docking_points)
+            {
+                world_part wp_new(this,"mineshaft_end");
+                if(wp_new.move_to_docking_point("dock_mineshaft_0",wp,String(dp.c_str())))
+                    world_parts.push_back(wp_new);
+            }
+        }
+    }
+    player_pos=Vector3(0,50,0);
 }
 
 void level::load_lua_level(std::string level_filename)
@@ -201,6 +261,7 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
         sound_source->SetSoundType(SOUND_MUSIC);
         sound_source->Play(sound);
     }
+
     player_.reset(new player(current_level.player_pos,this));
     {   // "load" flags
         for(auto p:current_level.flag_positions)
@@ -288,84 +349,6 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
     }
 
     timer_playing=0;
-
-    Node* last_world_part=0;
-    for(int i=0;i<2;i++)
-    {
-        Node* boxNode_=globals::instance()->scene->CreateChild();
-        nodes.emplace_back(boxNode_);
-        boxNode_->SetPosition(Vector3(100,8,20));
-        AnimatedModel* boxObject=boxNode_->CreateComponent<AnimatedModel>();
-        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_curve_90");
-        boxObject->SetCastShadows(true);
-
-        RigidBody* body=boxNode_->CreateComponent<RigidBody>();
-        body->SetCollisionLayer(2);     // Use layer bitmask 2 for static geometry
-        CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_curve_90.mdl"));
-
-        if(last_world_part)
-            move_bone_to_bone(boxNode_,"dock_mineshaft_0",last_world_part,"dock_mineshaft_1");
-        last_world_part=boxNode_;
-    }
-
-    {
-        Node* boxNode_=globals::instance()->scene->CreateChild();
-        nodes.emplace_back(boxNode_);
-        AnimatedModel* boxObject=boxNode_->CreateComponent<AnimatedModel>();
-        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_curve_90");
-        boxObject->SetCastShadows(true);
-
-        RigidBody* body=boxNode_->CreateComponent<RigidBody>();
-        body->SetCollisionLayer(2);     // Use layer bitmask 2 for static geometry
-        CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_curve_90.mdl"));
-
-        move_bone_to_bone(boxNode_,"dock_mineshaft_1",last_world_part,"dock_mineshaft_1");
-        last_world_part=boxNode_;
-    }
-
-    for(int i=0;i<4;i++)
-    {
-        Node* boxNode_=globals::instance()->scene->CreateChild();
-        nodes.emplace_back(boxNode_);
-        AnimatedModel* boxObject=boxNode_->CreateComponent<AnimatedModel>();
-        set_model(boxObject,globals::instance()->cache,"Data/Models/mineshaft_cross");
-        boxObject->SetCastShadows(true);
-
-        RigidBody* body=boxNode_->CreateComponent<RigidBody>();
-        body->SetCollisionLayer(2);     // Use layer bitmask 2 for static geometry
-        CollisionShape* shape=boxNode_->CreateComponent<CollisionShape>();
-        shape->SetTriangleMesh(globals::instance()->cache->GetResource<Model>("Data/Models/mineshaft_cross.mdl"));
-
-        move_bone_to_bone(boxNode_,"dock_mineshaft_1",last_world_part,"dock_mineshaft_0");
-        last_world_part=boxNode_;
-    }
-
-    world_part* last_wp=0;
-    for(int i=0;i<2;i++)
-    {
-        world_part wp(this,"mineshaft_straight");
-        wp.move_to_docking_point("dock_mineshaft_1",last_world_part,"dock_mineshaft_0");
-        world_parts.push_back(wp);
-        last_wp=&world_parts[world_parts.size()-1];
-    }
-
-    {
-        world_part wp(this,"mineshaft_straight");
-        wp.move_to_docking_point("dock_mineshaft_0",*last_wp,"dock_mineshaft_0");
-        world_parts.push_back(wp);
-        last_wp=&world_parts[world_parts.size()-1];
-    }
-
-    for(int i=0;i<4;i++)
-    {
-        world_part wp(this,"mineshaft_ramp");
-        wp.move_to_docking_point("dock_mineshaft_0",*last_wp,"dock_mineshaft_1");
-        world_parts.push_back(wp);
-        last_wp=&world_parts[world_parts.size()-1];
-    }
-
 
     // spawn some enemies
     for(int i=0;i<20;i++)
