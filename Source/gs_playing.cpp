@@ -1,5 +1,7 @@
+#include "misc.h"
 #include "gs_playing.h"
 
+#include <map>
 #include <Urho3D/Graphics/BillboardSet.h>
 #include <Urho3D/ThirdParty/PugiXml/pugixml.hpp>
 
@@ -13,7 +15,7 @@ using namespace std;
 using namespace Urho3D;
 
 // it may be better to do file loading with the proper Urho functions which search all registered paths
-level::level(std::string level_filename,game_state* gs)
+level::level(std::string level_filename)
 {
     if(level_filename.substr(level_filename.size()-4)==".lua")
     {
@@ -128,39 +130,100 @@ level::level(std::string level_filename,game_state* gs)
     {
         // place a starting world part
         {
-            world_part wp(gs,"mineshaft_straight",Vector3(0,50,0));
+            world_part wp("mineshaft_straight",Vector3(0,50,0));
             world_parts.push_back(wp);
         }
 
-        std::vector<String> world_part_list{"mineshaft_straight","mineshaft_curve_90","mineshaft_cross","mineshaft_ramp"};
+        // TODO add adjustable room probability.
+        std::vector<String> world_part_list{"mineshaft_straight","mineshaft_straight","mineshaft_curve_90","mineshaft_cross","mineshaft_ramp"};
 
-        // try to place up to 100 other parts
-        for(int i=0;i<100;i++)
+        // place 50 other parts
+        while(world_parts.size()<50||flag_positions.size()==0)
         {
             world_part* last_wp=&world_parts[Random(0,world_parts.size())];
-            world_part wp(gs,world_part_list[Random(0,world_part_list.size())]);
+            world_part wp(world_part_list[Random(0,world_part_list.size())]);
             String from_dock=wp.get_free_dock_name();
             String to_dock=last_wp->get_free_dock_name();
             if(!(from_dock.Length()&&to_dock.Length()))
                 continue;
-            if(wp.move_to_docking_point(from_dock,*last_wp,to_dock))
-                world_parts.push_back(wp);
+            if(!wp.move_to_docking_point(from_dock,*last_wp,to_dock))
+                continue;
+
+            if(wp.spawn_points.size())
+            {
+                float r=Random();
+                if(r<0.2)
+                {
+                    auto p=wp.node->node->GetChild(wp.spawn_points[0],true)->GetWorldPosition();
+                    flag_positions.emplace_back(p.x_,p.y_-2,p.z_);
+                }
+                else if(r<0.4)
+                {
+                    auto p=wp.node->node->GetChild(wp.spawn_points[0],true)->GetWorldPosition();
+                    torch_positions.emplace_back(p.x_,p.y_-1.5,p.z_);
+                }
+                else if(r<0.6)
+                {
+                    auto p=wp.node->node->GetChild(wp.spawn_points[0],true)->GetWorldPosition();
+                    enemy_positions.emplace_back(p.x_,p.y_-1.5,p.z_);
+                }
+            }
+
+            world_parts.push_back(wp);
         }
 
-        // put end pieces on all open docking points
-        int wp_count=world_parts.size();
-        for(int i=0;i<wp_count;i++)
-        {
-            world_part wp=world_parts[i];   // WEIRD: if I don't make a copy here (aka pointer or reference) wp is sometimes broken. Via value this works.
-            for(String dp:wp.docking_points)
-            {
-                world_part wp_new(gs,"mineshaft_end");
-                if(wp_new.move_to_docking_point("dock_mineshaft_0",wp,dp,true))
-                    world_parts.push_back(wp_new);
-            }
-        }
+        fix_occupied_ports();
+        place_end_pieces();
     }
     player_pos=Vector3(0,50,0);
+}
+
+class vec3
+{
+public:
+    float x_,y_,z_;
+
+    vec3(const Vector3& o) : x_(o.x_),y_(o.y_),z_(o.z_) {}
+    bool operator<(const vec3& rhs) const
+    {
+        if(x_<rhs.x_&&y_<rhs.y_&&z_<rhs.z_)
+            return true;
+        return false;
+    }
+};
+
+void level::fix_occupied_ports()
+{
+    std::multimap<vec3,std::pair<world_part*,String>> open_ports;
+    int wp_count=world_parts.size();
+    for(int i=0;i<wp_count;i++)
+    {
+        world_part* wp=world_parts.data()+i;
+        for(String dp:wp->docking_points)
+        {
+            if(wp->docking_points_occupied.find(dp)==wp->docking_points_occupied.end())
+                open_ports.emplace(vec3(wp->node->node->GetChild(dp,true)->GetWorldPosition()),std::make_pair(wp,dp));
+        }
+    }
+
+    for(auto e:open_ports)
+        cout<<e.first.x_<<e.first.y_<<e.first.z_<<endl;
+        //TODO
+}
+
+void level::place_end_pieces()
+{
+    int wp_count=world_parts.size();
+    for(int i=0;i<wp_count;i++)
+    {
+        world_part wp=world_parts[i];   // WEIRD: if I don't make a copy here (aka pointer or reference) wp is sometimes broken. Via value this works.
+        for(String dp:wp.docking_points)
+        {
+            world_part wp_new("mineshaft_end");
+            if(wp_new.move_to_docking_point("dock_mineshaft_0",wp,dp,true))
+                world_parts.push_back(wp_new);
+        }
+    }
 }
 
 void level::load_lua_level(std::string level_filename)
@@ -174,10 +237,12 @@ void level::load_lua_level(std::string level_filename)
 
 ///////////////
 
+gs_playing* gs_playing::instance;
 std::string gs_playing::last_level_filename;
 
 gs_playing::gs_playing(std::string level_filename) : game_state()
 {
+    instance=this;
     last_level_filename=level_filename;
     // create a transparent window with some text to display things like level time, remaining flags and FPS
     {
@@ -202,7 +267,7 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
     SubscribeToEvent(E_UPDATE,HANDLER(gs_playing,update));
     SubscribeToEvent(E_KEYDOWN,HANDLER(gs_playing,HandleKeyDown));
 
-    current_level=level(level_filename,this);
+    current_level=level(level_filename);
     for(auto& sm:current_level.static_models)
     {
         Node* boxNode_=globals::instance()->scene->CreateChild();
@@ -256,6 +321,9 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
 
         for(auto p:current_level.torch_positions)
             spawn_torch(p);
+
+        for(auto p:current_level.enemy_positions)
+            enemies.emplace_back(new enemy(p));
     }
     // skybox
     {

@@ -38,12 +38,14 @@ public:
     std::shared_ptr<node_wrapper> node;
     Urho3D::CollisionShape* shape;
 
-    world_part(game_state* gs,Urho3D::String model_name,Urho3D::Vector3 position=Urho3D::Vector3(0,0,0));
+    world_part(Urho3D::String model_name,Urho3D::Vector3 position=Urho3D::Vector3(0,0,0));
 
     /// \brief Contains all subnode names starting with "dock". Those are bones that signal docking points where other world parts can be docked.
     std::vector<Urho3D::String> docking_points;
     /// \brief Contains all docking parts where snother world part is already docked.
     std::set<Urho3D::String> docking_points_occupied;
+    /// \brief Contains all subnode names starting with "spawn". Those are bones that signal spawning points for stuff like enemies and items.
+    std::vector<Urho3D::String> spawn_points;
 
     /*std::vector<Urho3D::String> get_free_docks()
     {

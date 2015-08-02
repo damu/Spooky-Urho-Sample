@@ -3,11 +3,10 @@
 using namespace Urho3D;
 using namespace std;
 
-world_part::world_part(game_state* gs,String model_name,Urho3D::Vector3 pos)
+world_part::world_part(String model_name,Urho3D::Vector3 pos)
 {
     node=make_shared<node_wrapper>();
     node->node=globals::instance()->scene->CreateChild();
-    //gs->nodes.push_back(node);
     node->node->SetPosition(pos);
     AnimatedModel* boxObject=node->node->CreateComponent<AnimatedModel>();
     set_model(boxObject,globals::instance()->cache,("Data/Models/"+model_name).CString());
@@ -24,6 +23,8 @@ world_part::world_part(game_state* gs,String model_name,Urho3D::Vector3 pos)
         auto& c=childs[i];
         if(c->GetName().Substring(0,4)==Urho3D::String("dock"))
             docking_points.push_back(c->GetName().CString());
+        else if(c->GetName().Substring(0,5)==Urho3D::String("spawn"))
+            spawn_points.push_back(c->GetName().CString());
     }
 }
 

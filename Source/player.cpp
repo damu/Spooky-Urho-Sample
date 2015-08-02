@@ -64,10 +64,10 @@ player::player(Vector3 pos,game_state* gs)
         light=node_light->CreateComponent<Light>();
         light->SetLightType(LIGHT_SPOT);
         light->SetRange(100);
-        light->SetBrightness(1.2);
+        light->SetBrightness(1.6);
         light->SetColor(Color(1.0,1.0,1.0,1.0)*1);
         light->SetCastShadows(true);
-        light->SetFov(60);
+        light->SetFov(70);
         light->SetShapeTexture(globals::instance()->cache->GetResource<Texture2D>("Textures/flashlight.jpg"));
         light->SetRampTexture(globals::instance()->cache->GetResource<Texture2D>("Textures/ramp_flashlight.png"));
     }

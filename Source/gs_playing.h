@@ -68,6 +68,7 @@ class level
 public:
     std::vector<Urho3D::Vector3> torch_positions;
     std::vector<Urho3D::Vector3> flag_positions;
+    std::vector<Urho3D::Vector3> enemy_positions;
     std::vector<level_static_model> static_models;    ///< static level geometry like terrain and buildings. Will all get a triangle-mesh collider.
     std::vector<world_part> world_parts;
     Urho3D::Vector3 player_pos;
@@ -78,16 +79,20 @@ public:
 
     level(){}
     /// loads a level from an XML or LUA file
-    level(std::string filename,game_state* gs);
-    //void save();                    // saves a level to an XML file, not implemented but could be useful for an editor
+    level(std::string filename);
 
     void load_lua_level(std::string level_filename);
+    /// \brief Searches for fitting parts (like cross sections) that dock together and updates their occupied docts regardingly.
+    void fix_occupied_ports();
+    /// \brief Puts end pieces on all open docking points
+    void place_end_pieces();
 };
 
 /// The game state handling playing a level.
 class gs_playing : public game_state
 {
 public:
+    static gs_playing* instance;
     Urho3D::Text* window_text;              ///< The GUI text element in the window at the top that displays the level time, coordinates and FPS.
     double timer_playing=0;                 ///< The time the level is already played. Increased each frame with the frameStep.
     double goal_time=0;                     ///< The time the player needed to complete the level.

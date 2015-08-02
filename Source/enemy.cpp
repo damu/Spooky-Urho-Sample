@@ -96,7 +96,7 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
         float movement_speed=0.3;
 
         // if the player is close, approach him
-        if((node->GetWorldPosition()-globals::instance()->player_node->GetWorldPosition()).Length()<50)
+        if((node->GetWorldPosition()-globals::instance()->player_node->GetWorldPosition()).Length()<20)
         {
             movement_speed=0.9;
             node_aim->LookAt(target_position);
