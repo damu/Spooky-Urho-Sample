@@ -69,6 +69,7 @@ public:
     std::vector<Urho3D::Vector3> torch_positions;
     std::vector<Urho3D::Vector3> flag_positions;
     std::vector<level_static_model> static_models;    ///< static level geometry like terrain and buildings. Will all get a triangle-mesh collider.
+    std::vector<world_part> world_parts;
     Urho3D::Vector3 player_pos;
     Urho3D::String sound_name;
     Urho3D::String skybox_material="Materials/Skybox.xml";
@@ -77,7 +78,7 @@ public:
 
     level(){}
     /// loads a level from an XML or LUA file
-    level(std::string filename);
+    level(std::string filename,game_state* gs);
     //void save();                    // saves a level to an XML file, not implemented but could be useful for an editor
 
     void load_lua_level(std::string level_filename);
@@ -94,7 +95,6 @@ public:
     static std::string last_level_filename; ///< Used to restart the last played level (like from gs_level_end).
     std::unique_ptr<player> player_;
     std::vector<std::unique_ptr<enemy>> enemies;
-    std::vector<world_part> world_parts;
     float level_min_height=999999;          ///< When the player gets below this height, he dies.
     level current_level;
     delayed_action_handler delayed_actions;

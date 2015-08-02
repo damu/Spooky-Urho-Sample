@@ -13,7 +13,7 @@ using namespace std;
 using namespace Urho3D;
 
 // it may be better to do file loading with the proper Urho functions which search all registered paths
-level::level(std::string level_filename)
+level::level(std::string level_filename,game_state* gs)
 {
     if(level_filename.substr(level_filename.size()-4)==".lua")
     {
@@ -124,60 +124,38 @@ level::level(std::string level_filename)
         }
     }
 
+    // generate random map by combining world parts
     {
-        world_part* last_wp=0;
+        // place a starting world part
         {
-            world_part wp(this,"mineshaft_curve_90",Vector3(0,50,0));
+            world_part wp(gs,"mineshaft_straight",Vector3(0,50,0));
             world_parts.push_back(wp);
-            last_wp=&world_parts[world_parts.size()-1];
         }
 
+        std::vector<String> world_part_list{"mineshaft_straight","mineshaft_curve_90","mineshaft_cross","mineshaft_ramp"};
+
+        // try to place up to 100 other parts
+        for(int i=0;i<100;i++)
         {
-            world_part wp(this,"mineshaft_curve_90");
-            wp.move_to_docking_point("dock_mineshaft_1",*last_wp,"dock_mineshaft_1");
-            world_parts.push_back(wp);
-            last_wp=&world_parts[world_parts.size()-1];
+            world_part* last_wp=&world_parts[Random(0,world_parts.size())];
+            world_part wp(gs,world_part_list[Random(0,world_part_list.size())]);
+            String from_dock=wp.get_free_dock_name();
+            String to_dock=last_wp->get_free_dock_name();
+            if(!(from_dock.Length()&&to_dock.Length()))
+                continue;
+            if(wp.move_to_docking_point(from_dock,*last_wp,to_dock))
+                world_parts.push_back(wp);
         }
 
-        for(int i=0;i<4;i++)
-        {
-            world_part wp(this,"mineshaft_cross");
-            wp.move_to_docking_point("dock_mineshaft_1",*last_wp,"dock_mineshaft_0");
-            world_parts.push_back(wp);
-            last_wp=&world_parts[world_parts.size()-1];
-        }
-
-        for(int i=0;i<2;i++)
-        {
-            world_part wp(this,"mineshaft_straight");
-            wp.move_to_docking_point("dock_mineshaft_1",*last_wp,"dock_mineshaft_0");
-            world_parts.push_back(wp);
-            last_wp=&world_parts[world_parts.size()-1];
-        }
-
-        {
-            world_part wp(this,"mineshaft_straight");
-            wp.move_to_docking_point("dock_mineshaft_0",*last_wp,"dock_mineshaft_0");
-            world_parts.push_back(wp);
-            last_wp=&world_parts[world_parts.size()-1];
-        }
-
-        for(int i=0;i<4;i++)
-        {
-            world_part wp(this,"mineshaft_ramp");
-            wp.move_to_docking_point("dock_mineshaft_0",*last_wp,"dock_mineshaft_1");
-            world_parts.push_back(wp);
-            last_wp=&world_parts[world_parts.size()-1];
-        }
-
+        // put end pieces on all open docking points
         int wp_count=world_parts.size();
         for(int i=0;i<wp_count;i++)
         {
             world_part wp=world_parts[i];   // WEIRD: if I don't make a copy here (aka pointer or reference) wp is sometimes broken. Via value this works.
-            for(string dp:wp.docking_points)
+            for(String dp:wp.docking_points)
             {
-                world_part wp_new(this,"mineshaft_end");
-                if(wp_new.move_to_docking_point("dock_mineshaft_0",wp,String(dp.c_str())))
+                world_part wp_new(gs,"mineshaft_end");
+                if(wp_new.move_to_docking_point("dock_mineshaft_0",wp,dp,true))
                     world_parts.push_back(wp_new);
             }
         }
@@ -224,7 +202,7 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
     SubscribeToEvent(E_UPDATE,HANDLER(gs_playing,update));
     SubscribeToEvent(E_KEYDOWN,HANDLER(gs_playing,HandleKeyDown));
 
-    current_level=level(level_filename);
+    current_level=level(level_filename,this);
     for(auto& sm:current_level.static_models)
     {
         Node* boxNode_=globals::instance()->scene->CreateChild();
@@ -485,6 +463,8 @@ void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
     }
     else if(key==KEY_E)
         enemies.emplace_back(new enemy(player_->node->GetPosition()+Vector3(5,2,0)));
+    else if(key==KEY_P)
+        player_->body->SetPosition(player_->body->GetPosition()+Vector3(0,20,0));
 }
 
 void gs_playing::spawn_torch(Vector3 pos)
