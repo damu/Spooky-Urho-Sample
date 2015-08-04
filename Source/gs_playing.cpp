@@ -8,8 +8,6 @@
 #include "gs_pause.h"
 #include "gs_level_end.h"
 #include "gs_death.h"
-#include "player.h"
-#include "enemy.h"
 
 using namespace std;
 using namespace Urho3D;
@@ -242,6 +240,8 @@ std::string gs_playing::last_level_filename;
 
 gs_playing::gs_playing(std::string level_filename) : game_state()
 {
+    if(instance)
+        instance->~gs_playing();
     instance=this;
     last_level_filename=level_filename;
     // create a transparent window with some text to display things like level time, remaining flags and FPS
@@ -404,7 +404,7 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
         pos.x_=Random(-100,100);
         pos.z_=Random(-100,100);
         Ray ray(pos,Vector3(0,-1,0));
-        globals::instance()->physical_world->SphereCast(result,ray,2,200);
+        globals::instance()->physical_world->SphereCast(result,ray,2,200,2);
         if(result.distance_<=1000)
             pos=result.position_+Vector3(0,5,0);
 

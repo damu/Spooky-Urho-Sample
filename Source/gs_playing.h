@@ -4,6 +4,8 @@
 #include "game_state.h"
 #include "enemy.h"
 #include "world_part.h"
+#include "player.h"
+#include "enemy.h"
 
 #include <Urho3D/Graphics/Light.h>
 #include <Urho3D/Graphics/Model.h>

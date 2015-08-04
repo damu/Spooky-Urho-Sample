@@ -1,6 +1,10 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <Urho3D/Core/CoreEvents.h>
+#include <Urho3D/Input/Input.h>
+#include <Urho3D/Input/InputEvents.h>
+
 #include "gs_playing.h"
 
 /// \brief Creates and manages the player and the camera.

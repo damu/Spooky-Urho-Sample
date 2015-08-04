@@ -1,5 +1,8 @@
 #include "enemy.h"
+#include "gs_playing.h"
+#include "player.h"
 
+using namespace std;
 using namespace Urho3D;
 
 enemy::enemy(Vector3 pos) : Object(globals::instance()->context)
@@ -95,8 +98,14 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
         Quaternion rot=body->GetRotation();
         float movement_speed=0.3;
 
-        // if the player is close, approach him
-        if((node->GetWorldPosition()-globals::instance()->player_node->GetWorldPosition()).Length()<20)
+        // if the player is close and visible, approach him
+        Vector3 direction_towards_player=globals::instance()->player_node->GetWorldPosition()-node_model->GetWorldPosition();
+        float distance_to_player=(node_model->GetWorldPosition()-globals::instance()->player_node->GetWorldPosition()).Length();
+        float viewing_angle=node_model->GetWorldDirection().Angle(direction_towards_player);
+        PhysicsRaycastResult result;
+        Ray ray(node_model->GetWorldPosition()+Vector3(0,1,0),direction_towards_player);
+        globals::instance()->physical_world->RaycastSingle(result,ray,distance_to_player+1);
+        if(distance_to_player<50&&viewing_angle<100&&result.body_==gs_playing::instance->player_->body)
         {
             movement_speed=0.9;
             node_aim->LookAt(target_position);
@@ -114,16 +123,22 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
         }
         else    // or wander around randomly
         {
-            if(wander_timer.until_now()>wander_timeout)
+wander:
+            PhysicsRaycastResult result;
+            Ray ray(node_model->GetWorldPosition()+Vector3(0,1,0),node_model->GetDirection());
+            globals::instance()->physical_world->RaycastSingle(result,ray,5);
+//cout<<result.distance_;
+            if(wander_timer.until_now()>wander_timeout||result.distance_<5) // pick new wander target if timer timed out or if standing in front of a wall (later not yet working properly)
             {
+//cout<<" ###";
                 wander_timer.reset();
                 wander_timeout=4+Random(0.0f,4.0f);
                 if(Random(0.0f,100.0f)>25.0f)  // chance of 25% to stand around
-                    wander_target=Vector3(Random(-100,100),0,Random(-100,100));
+                    wander_target=node_model->GetWorldPosition()+Vector3(Random(-10,10),node->GetWorldPosition().y_+1,Random(-10,10));
                 else
                     wander_target=node->GetWorldPosition();
             }
-
+//cout<<endl;
             if((node->GetWorldPosition()-wander_target).Length()>2) // do nothing if target reached
             {
                 node_aim->LookAt(wander_target);
