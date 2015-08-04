@@ -165,6 +165,35 @@ level::level(std::string level_filename)
                     auto p=wp.node->node->GetChild(wp.spawn_points[0],true)->GetWorldPosition();
                     enemy_positions.emplace_back(p.x_,p.y_-1.5,p.z_);
                 }
+                else
+                for(int i=0;i<Random(7);i++)
+                {
+                    auto node_stone=globals::instance()->scene->CreateChild("Stone");
+                    StaticModel* boxObject=node_stone->CreateComponent<StaticModel>();
+                    boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
+                    boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/rock.xml"));
+                    boxObject->SetCastShadows(true);
+                    float s=0.2+Random(0.4f);
+                    node_stone->SetScale(s);
+
+                    PhysicsRaycastResult result;
+                    auto pos=wp.node->node->GetChild(wp.spawn_points[0],true)->GetWorldPosition();
+                    pos+=Vector3(Random(-1.0f,1.0f),1,Random(-1.0f,1.0f));
+                    Ray ray(pos,Vector3(0,-1,0));
+                    globals::instance()->physical_world->SphereCast(result,ray,0.2,100);
+                    if(result.distance_<=1000)
+                        pos=result.position_+Vector3(0,0.1,0);
+
+                    auto body_stone=node_stone->CreateComponent<RigidBody>();
+                    body_stone->SetPosition(pos);
+                    body_stone->SetCollisionLayer(3);
+                    body_stone->SetMass(50.0*s*s);
+                    body_stone->SetLinearDamping(0.2f);
+                    body_stone->SetAngularDamping(0.2f);
+                    body_stone->SetFriction(0.6);
+                    CollisionShape* shape=node_stone->CreateComponent<CollisionShape>();
+                    shape->SetConvexHull(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
+                }
             }
 
             world_parts.push_back(wp);
@@ -266,6 +295,8 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
 
     SubscribeToEvent(E_UPDATE,HANDLER(gs_playing,update));
     SubscribeToEvent(E_KEYDOWN,HANDLER(gs_playing,HandleKeyDown));
+    SubscribeToEvent(E_MOUSEBUTTONDOWN,HANDLER(gs_playing,HandleMouseDown));
+    SubscribeToEvent(E_MOUSEBUTTONUP,HANDLER(gs_playing,HandleMouseUp));
 
     current_level=level(level_filename);
     for(auto& sm:current_level.static_models)
@@ -386,10 +417,8 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
         body_stone->SetMass(50.0*s*s);
         body_stone->SetLinearDamping(0.2f);
         body_stone->SetAngularDamping(0.2f);
-        //body_stone->SetAngularFactor(Vector3(0,1,0));
         body_stone->SetFriction(0.6);
         CollisionShape* shape=node_stone->CreateComponent<CollisionShape>();
-        //shape->SetCapsule(1,1.2);
         shape->SetConvexHull(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
         node_stone->Remove();
     }
@@ -509,6 +538,15 @@ std::string str;
 
     if(player_->node->GetWorldPosition().y_<level_min_height-10)    // die if below level geometry
         globals::instance()->game_states.emplace_back(new gs_death);
+
+    if(grabbed_body)
+    {
+        Vector3 target=globals::instance()->camera->GetNode()->GetWorldPosition()+globals::instance()->camera->GetNode()->GetWorldDirection()*grab_distance;
+        Vector3 source=grabbed_body->GetPosition();
+        grabbed_body->ApplyImpulse((target-source)*500*timeStep-grabbed_body->GetLinearVelocity()*0.05*grabbed_body->GetMass());
+        //if((target-source).Length()>1)
+        //    grabbed_body=0;
+    }
 }
 
 void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
@@ -533,6 +571,23 @@ void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
         enemies.emplace_back(new enemy(player_->node->GetPosition()+Vector3(5,2,0)));
     else if(key==KEY_P)
         player_->body->SetPosition(player_->body->GetPosition()+Vector3(0,20,0));
+}
+
+void gs_playing::HandleMouseDown(StringHash eventType,VariantMap& eventData)
+{
+    PhysicsRaycastResult result;
+    Ray ray=globals::instance()->camera->GetScreenRay(0.5,0.5);
+    globals::instance()->physical_world->SphereCast(result,ray,0.1,10);
+    if(result.body_&&result.distance_<2&&result.body_!=player_->body)
+    {
+        grabbed_body=result.body_;
+        grab_distance=(result.body_->GetPosition()-globals::instance()->camera->GetNode()->GetWorldPosition()).Length();
+    }
+}
+
+void gs_playing::HandleMouseUp(StringHash eventType,VariantMap& eventData)
+{
+    grabbed_body=0;
 }
 
 void gs_playing::spawn_torch(Vector3 pos)

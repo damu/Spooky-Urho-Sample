@@ -105,10 +105,14 @@ public:
     float level_min_height=999999;          ///< When the player gets below this height, he dies.
     level current_level;
     delayed_action_handler delayed_actions;
+    Urho3D::RigidBody* grabbed_body=0;      ///< while holding the mouse, things can be physically moved.
+    float grab_distance=1;
 
     gs_playing(std::string level_filename);
     void update(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
     void HandleKeyDown(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
+    void HandleMouseDown(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
+    void HandleMouseUp(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
     void spawn_torch(Urho3D::Vector3 pos);
 
     virtual const Urho3D::String& GetTypeName() const {static Urho3D::String name("gs_playing");return name;}   // this could be correct
