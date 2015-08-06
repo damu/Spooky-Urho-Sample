@@ -27,19 +27,19 @@ enemy::enemy(Vector3 pos) : Object(globals::instance()->context)
     CollisionShape* shape=node->CreateComponent<CollisionShape>();
     shape->SetCapsule(1.8,3,Vector3(0,1.5,0));
 
-    /*{
-        Animation* ani=globals::instance()->cache->GetResource<Animation>("Models/robot_stand.ani");
+    {
+        Animation* ani=globals::instance()->cache->GetResource<Animation>("Models/merguns_stand.ani");
         as_stand=boxObject->AddAnimationState(ani);
         as_stand->SetWeight(1.0f);
         as_stand->SetLooped(true);
     }
     {
-        Animation* ani=globals::instance()->cache->GetResource<Animation>("Models/robot_walk.ani");
+        Animation* ani=globals::instance()->cache->GetResource<Animation>("Models/merguns_walk.ani");
         as_walk=boxObject->AddAnimationState(ani);
         as_walk->SetWeight(0.0f);
         as_walk->SetLooped(true);
     }
-    {
+    /*{
         Animation* ani=globals::instance()->cache->GetResource<Animation>("Models/robot_run.ani");
         as_run=boxObject->AddAnimationState(ani);
         as_run->SetWeight(0.0f);
@@ -179,17 +179,17 @@ wander:
                 on_floor=true;
             if(!on_floor)
                 moveDir*=0.35;
-/*
+
             as_stand->AddTime(timeStep/2);
             as_walk->AddTime(timeStep*vel.Length()/1.5);
-            as_run->AddTime(timeStep*vel.Length()/3);
+/*            as_run->AddTime(timeStep*vel.Length()/3);
             as_jump->AddTime(timeStep);
-            as_reversing->AddTime(timeStep);
+            as_reversing->AddTime(timeStep);*/
             as_stand->SetWeight(1.0-Clamp(vel.Length()/2,0.0,1.0));
             as_stand->SetWeight(1.0);
-            as_walk->SetWeight(Clamp(vel.Length()/2,0.0,1.0));
-            as_run->SetWeight(Clamp((vel.Length()-2)/2,0.0,1.0));*/   // maybe this should be done differently, but works for this game
-//            if(!on_floor)
+            as_walk->SetWeight(Clamp(1.0,0.0,1.0));
+//            as_run->SetWeight(Clamp((vel.Length()-2)/2,0.0,1.0));   // maybe this should be done differently, but works for this game
+            if(!on_floor){}
 //                as_jump->SetWeight(as_jump->GetWeight()+timeStep*5);
             else
             {

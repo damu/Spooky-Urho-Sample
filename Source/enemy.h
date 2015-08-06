@@ -28,9 +28,9 @@ class enemy : public Urho3D::Object
 {
 public:
     Urho3D::Vector3 pos_last;
-    /*Urho3D::AnimationState* as_stand;
+    Urho3D::AnimationState* as_stand;
     Urho3D::AnimationState* as_walk;
-    Urho3D::AnimationState* as_run;
+    /*Urho3D::AnimationState* as_run;
     Urho3D::AnimationState* as_jump;*/
     Urho3D::Node* node;
     Urho3D::Node* node_model;
