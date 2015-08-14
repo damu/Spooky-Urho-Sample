@@ -109,12 +109,14 @@ public:
     Urho3D::RigidBody* highlighted_body=0;
     float grab_distance=1;
     std::vector<Urho3D::Material*> highlight_old_materials;
+    Urho3D::Sound* sound_stone_collision=0;
 
     gs_playing(std::string level_filename);
     void update(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
     void HandleKeyDown(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
     void HandleMouseDown(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
     void HandleMouseUp(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
+    void HandleStoneCollision(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
     void spawn_torch(Urho3D::Vector3 pos);
 
     virtual const Urho3D::String& GetTypeName() const {static Urho3D::String name("gs_playing");return name;}   // this could be correct

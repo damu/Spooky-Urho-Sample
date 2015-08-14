@@ -132,10 +132,11 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
             }
             else
             {
-                movement_speed=0.9;
                 as_current=as_run;
                 node_aim->LookAt(target_position);
                 auto yaw_diff=rot.YawAngle()-node_aim->GetWorldRotation().YawAngle();
+                if(abs(yaw_diff)<40)
+                    movement_speed=0.9;
 
                 if(yaw_diff>180)
                     yaw_diff-=360;

@@ -168,14 +168,6 @@ level::level(std::string level_filename)
                 else
                 for(int i=0;i<Random(7);i++)
                 {
-                    auto node_stone=globals::instance()->scene->CreateChild("Stone");
-                    StaticModel* boxObject=node_stone->CreateComponent<StaticModel>();
-                    boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
-                    boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/rock.xml"));
-                    boxObject->SetCastShadows(true);
-                    float s=0.2+Random(0.4f);
-                    node_stone->SetScale(s);
-
                     PhysicsRaycastResult result;
                     auto pos=wp.node->node->GetChild(wp.spawn_points[0],true)->GetWorldPosition();
                     pos+=Vector3(Random(-1.0f,1.0f),1,Random(-1.0f,1.0f));
@@ -183,6 +175,14 @@ level::level(std::string level_filename)
                     globals::instance()->physical_world->SphereCast(result,ray,0.2,100);
                     if(result.distance_<=1000)
                         pos=result.position_+Vector3(0,0.1,0);
+
+                    auto node_stone=globals::instance()->scene->CreateChild("Stone");
+                    StaticModel* boxObject=node_stone->CreateComponent<StaticModel>();
+                    boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
+                    boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/rock.xml"));
+                    boxObject->SetCastShadows(true);
+                    float s=0.2+Random(0.4f);
+                    node_stone->SetScale(s);
 
                     auto body_stone=node_stone->CreateComponent<RigidBody>();
                     body_stone->SetPosition(pos);
@@ -193,6 +193,8 @@ level::level(std::string level_filename)
                     body_stone->SetFriction(0.6);
                     CollisionShape* shape=node_stone->CreateComponent<CollisionShape>();
                     shape->SetConvexHull(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
+
+                    gs_playing::instance->SubscribeToEvent(node_stone,E_NODECOLLISIONSTART,new Urho3D::EventHandlerImpl<gs_playing>(gs_playing::instance,&gs_playing::HandleStoneCollision));
                 }
             }
 
@@ -201,6 +203,8 @@ level::level(std::string level_filename)
 
         fix_occupied_ports();
         place_end_pieces();
+
+        globals::instance()->physical_world->Update(5); // let all physical stuff settle a bit.
     }
     player_pos=Vector3(0,50,0);
 }
@@ -409,6 +413,7 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
     // spawn one rock and remove it to cache the collider mesh (to avoid a ~1 second lag when spawning the first rock during the game)
     {
         auto node_stone=globals::instance()->scene->CreateChild("Stone");
+        nodes.emplace_back(node_stone);
         StaticModel* boxObject=node_stone->CreateComponent<StaticModel>();
         boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
         boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/rock.xml"));
@@ -451,6 +456,8 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
 
         enemies.emplace_back(new enemy(pos));
     }
+
+    sound_stone_collision=globals::instance()->cache->GetResource<Sound>("Sounds/stone_fall.wav");
 }
 
 void gs_playing::update(StringHash eventType,VariantMap& eventData)
@@ -464,7 +471,7 @@ void gs_playing::update(StringHash eventType,VariantMap& eventData)
     float timeStep=eventData[Update::P_TIMESTEP].GetFloat();
     timer_playing+=timeStep;
 
-std::string str;
+    std::string str;
     {
         static double last_second=0;
         static double last_second_frames=1;
@@ -639,6 +646,20 @@ void gs_playing::HandleMouseDown(StringHash eventType,VariantMap& eventData)
 void gs_playing::HandleMouseUp(StringHash eventType,VariantMap& eventData)
 {
     grabbed_body=0;
+}
+
+void gs_playing::HandleStoneCollision(StringHash eventType,VariantMap& eventData)
+{
+    auto body=(RigidBody*)eventData["Body"].GetVoidPtr();
+    Node* node=body->GetNode();
+    auto sound_source=node->CreateComponent<SoundSource3D>();
+    sound_source->SetNearDistance(1);
+    sound_source->SetFarDistance(55);
+    sound_source->SetSoundType(SOUND_EFFECT);
+    sound_source->SetFrequency(44100/(node->GetScale().x_*3.0));
+    sound_source->SetAutoRemove(true);
+    sound_source->SetGain(std::min(1.0,1.5*body->GetLinearVelocity().Length()));
+    sound_source->Play(sound_stone_collision);
 }
 
 void gs_playing::spawn_torch(Vector3 pos)
