@@ -1,5 +1,6 @@
 #include "enemy.h"
 #include "gs_playing.h"
+#include "gs_death.h"
 #include "player.h"
 
 using namespace std;
@@ -39,13 +40,13 @@ enemy::enemy(Vector3 pos) : Object(globals::instance()->context)
         as_walk->SetWeight(0.0f);
         as_walk->SetLooped(true);
     }
-    /*{
-        Animation* ani=globals::instance()->cache->GetResource<Animation>("Models/robot_run.ani");
+    {
+        Animation* ani=globals::instance()->cache->GetResource<Animation>("Models/merguns_run.ani");
         as_run=boxObject->AddAnimationState(ani);
         as_run->SetWeight(0.0f);
         as_run->SetLooped(true);
     }
-    {
+    /*{
         Animation* ani=globals::instance()->cache->GetResource<Animation>("Models/robot_jump.ani");
         as_jump=boxObject->AddAnimationState(ani);
         as_jump->SetWeight(0.0f);
@@ -59,8 +60,8 @@ enemy::enemy(Vector3 pos) : Object(globals::instance()->context)
     }*/
 
     {
-        sound_step1=globals::instance()->cache->GetResource<Sound>("Sounds/step1.ogg");
-        sound_step2=globals::instance()->cache->GetResource<Sound>("Sounds/step2.ogg");
+        sound_step1=globals::instance()->cache->GetResource<Sound>("Sounds/step1_deep.ogg");
+        sound_step2=globals::instance()->cache->GetResource<Sound>("Sounds/step2_deep.ogg");
         sound_source1=node_model->CreateComponent<SoundSource3D>();
         sound_source1->SetNearDistance(1);
         sound_source1->SetFarDistance(55);
@@ -69,6 +70,14 @@ enemy::enemy(Vector3 pos) : Object(globals::instance()->context)
         sound_source2->SetNearDistance(1);
         sound_source2->SetFarDistance(55);
         sound_source2->SetSoundType(SOUND_EFFECT);
+
+        sound_eat=globals::instance()->cache->GetResource<Sound>("Sounds/236331__sclolex__zombieeatingflesh.ogg");
+        sound_eat->SetLooped(true);
+        sound_source_eat=node_model->CreateComponent<SoundSource3D>();
+        sound_source_eat->SetNearDistance(1);
+        sound_source_eat->SetFarDistance(55);
+        sound_source_eat->SetSoundType(SOUND_EFFECT);
+        sound_source_eat->SetGain(0.5);
     }
 
     SubscribeToEvent(E_UPDATE,HANDLER(enemy,update));
@@ -76,6 +85,9 @@ enemy::enemy(Vector3 pos) : Object(globals::instance()->context)
 
 void enemy::update(StringHash eventType,VariantMap& eventData)
 {
+    if(globals::instance()->game_states.size()>1)   // if paused, do nothing
+       return;
+
     node_target=globals::instance()->player_node;
     Vector3 target_position=node_target->GetWorldPosition();
     float timeStep=eventData[Update::P_TIMESTEP].GetFloat();
@@ -96,7 +108,8 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
 
         Vector3 vel=body->GetLinearVelocity()*Vector3(1,0,1);
         Quaternion rot=body->GetRotation();
-        float movement_speed=0.3;
+        float movement_speed=0.2;
+        auto as_current=as_stand;
 
         // if the player is close and visible, approach him
         Vector3 direction_towards_player=globals::instance()->player_node->GetWorldPosition()-node_model->GetWorldPosition();
@@ -105,21 +118,35 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
         PhysicsRaycastResult result;
         Ray ray(node_model->GetWorldPosition()+Vector3(0,1,0),direction_towards_player);
         globals::instance()->physical_world->RaycastSingle(result,ray,distance_to_player+1);
-        if(distance_to_player<50&&viewing_angle<100&&result.body_==gs_playing::instance->player_->body)
+        if(distance_to_player<20&&viewing_angle<100&&result.body_==gs_playing::instance->player_->body)
         {
-            movement_speed=0.9;
-            node_aim->LookAt(target_position);
-            auto yaw_diff=rot.YawAngle()-node_aim->GetWorldRotation().YawAngle();
+            if(distance_to_player<2)   // attack (currently instant death)
+            {
+                if(!sound_source_eat->IsPlaying())
+                {
+                    sound_source_eat->Play(sound_eat);
+                    auto gs_d=new gs_death;
+                    globals::instance()->game_states.emplace_back(gs_d);
+                    gs_d->text_death_reason->SetText("You got killed by a monster.");
+                }
+            }
+            else
+            {
+                movement_speed=0.9;
+                as_current=as_run;
+                node_aim->LookAt(target_position);
+                auto yaw_diff=rot.YawAngle()-node_aim->GetWorldRotation().YawAngle();
 
-            if(yaw_diff>180)
-                yaw_diff-=360;
-            else if(yaw_diff<-180)
-                yaw_diff+=360;
+                if(yaw_diff>180)
+                    yaw_diff-=360;
+                else if(yaw_diff<-180)
+                    yaw_diff+=360;
 
-            if(yaw_diff<-5||yaw_diff>5)
-                body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*100,-1500.0,1500.0),0));
+                if(yaw_diff<-5||yaw_diff>5)
+                    body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*100,-1500.0,1500.0),0));
 
-            moveDir+=Vector3::FORWARD*1;
+                moveDir+=Vector3::FORWARD*1;
+            }
         }
         else    // or wander around randomly
         {
@@ -128,18 +155,18 @@ wander:
             Ray ray(node_model->GetWorldPosition()+Vector3(0,1,0),node_model->GetDirection());
             globals::instance()->physical_world->RaycastSingle(result,ray,5);
 //cout<<result.distance_;
-            if(wander_timer.until_now()>wander_timeout||result.distance_<5) // pick new wander target if timer timed out or if standing in front of a wall (later not yet working properly)
+            if(wander_timer.until_now()>wander_timeout/*||result.distance_<5*/) // pick new wander target if timer timed out or if standing in front of a wall (later not yet working properly)
             {
 //cout<<" ###";
                 wander_timer.reset();
                 wander_timeout=4+Random(0.0f,4.0f);
-                if(Random(0.0f,100.0f)>25.0f)  // chance of 25% to stand around
-                    wander_target=node_model->GetWorldPosition()+Vector3(Random(-10,10),node->GetWorldPosition().y_+1,Random(-10,10));
+                if(Random(0.0f,100.0f)>50.0f)  // chance of 25% to stand around
+                    wander_target=node_model->GetWorldPosition()+Vector3(Random(-50,50),node->GetWorldPosition().y_,Random(-50,50));
                 else
-                    wander_target=node->GetWorldPosition();
+                    wander_target=node_model->GetWorldPosition();
             }
 //cout<<endl;
-            if((node->GetWorldPosition()-wander_target).Length()>2) // do nothing if target reached
+            if((node->GetWorldPosition()-wander_target).Length()>5) // do nothing if target reached
             {
                 node_aim->LookAt(wander_target);
                 auto yaw_diff=rot.YawAngle()-node_aim->GetWorldRotation().YawAngle();
@@ -153,6 +180,7 @@ wander:
                     body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*50,-300.0,300.0),0));
 
                 moveDir+=Vector3::FORWARD*1;
+                as_current=as_walk;
             }
         }
 
@@ -164,11 +192,11 @@ wander:
         if(moveDir.Length()>0.5)
             moveDir.Normalize();
 
-        static bool on_floor;
+        bool on_floor;
         Vector3 moveDir_world;
         {
-            static bool at_wall;
-            static int jumping=0; // 0 = not jumping, 1 = jumping, 2 =
+            bool at_wall;
+            int jumping=0; // 0 = not jumping, 1 = jumping
             on_floor=false;
 
             float height=0;
@@ -180,42 +208,51 @@ wander:
             if(!on_floor)
                 moveDir*=0.35;
 
-            as_stand->AddTime(timeStep/2);
-            as_walk->AddTime(timeStep*vel.Length()/1.5);
-/*            as_run->AddTime(timeStep*vel.Length()/3);
-            as_jump->AddTime(timeStep);
+            as_stand->AddTime(timeStep*0.15);
+            as_walk->AddTime(timeStep*vel.Length()*0.55);
+            as_run->AddTime(timeStep*vel.Length()*0.3);
+/*            as_jump->AddTime(timeStep);
             as_reversing->AddTime(timeStep);*/
-            as_stand->SetWeight(1.0-Clamp(vel.Length()/2,0.0,1.0));
-            as_stand->SetWeight(1.0);
-            as_walk->SetWeight(Clamp(1.0,0.0,1.0));
-//            as_run->SetWeight(Clamp((vel.Length()-2)/2,0.0,1.0));   // maybe this should be done differently, but works for this game
-            if(!on_floor){}
+            if(as_current!=as_stand)
+                as_stand->SetWeight(as_stand->GetWeight()-timeStep*2.0);
+            if(as_current!=as_walk)
+                as_walk->SetWeight(as_walk->GetWeight()-timeStep*2.0);
+            if(as_current!=as_run)
+                as_run->SetWeight(as_run->GetWeight()-timeStep*2.0);
+            as_current->SetWeight(as_current->GetWeight()+timeStep*2.0);
+
+            if(!on_floor)
+            {}
 //                as_jump->SetWeight(as_jump->GetWeight()+timeStep*5);
             else
             {
 //                as_jump->SetWeight(0.0);
+                float animation_progress=0;
+                if(as_walk->GetWeight()>0.5)
+                    animation_progress=as_walk->GetTime();
+                else if(as_run->GetWeight()>0.5)
+                    animation_progress=as_run->GetTime();
 
-                static bool sound_step1_not_played=true;    // not playing this animation cycle
-                static bool sound_step2_not_played=true;
-                /*if(as_run->GetTime()>0.1&&sound_step1_not_played&&as_reversing->GetWeight()<0.5)
+                if(animation_progress<animation_progress_last)
+                {
+                    sound_step1_not_played=true;
+                    sound_step2_not_played=true;
+                }
+                animation_progress_last=animation_progress;
+                if(animation_progress>0.1&&sound_step1_not_played)
                 {
                     sound_source1->Play(sound_step1);
                     sound_step1_not_played=false;
                 }
-                if(as_run->GetTime()>0.6&&sound_step2_not_played&&as_reversing->GetWeight()<0.5)
+                if(animation_progress>0.6&&sound_step2_not_played)
                 {
                     sound_source2->Play(sound_step2);
                     sound_step2_not_played=false;
                 }
-                if(as_run->GetTime()<0.1)
-                {
-                    sound_step1_not_played=true;
-                    sound_step2_not_played=true;
-                }*/
             }
 /*
-            static float jump_force_applied=0;
-            static const float max_jump_force_applied=100;
+            float jump_force_applied=0;
+            const float max_jump_force_applied=100;
             moveDir_world=node->GetWorldRotation()*moveDir;
 
             if(jumping==1&&jump_force_applied<max_jump_force_applied)   // jump higher if we are jumping and the limit has not been reached

@@ -23,13 +23,13 @@ gs_death::gs_death() : game_state()
         button->SetStyle("Window");
         button->SetOpacity(0.75);
         {
-            Text* t=new Text(globals::instance()->context);
-            t->SetFont(globals::instance()->cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"),20);
-            t->SetHorizontalAlignment(HA_CENTER);
-            t->SetVerticalAlignment(VA_CENTER);
-            t->SetName("Text");
-            t->SetText("You died.");
-            button->AddChild(t);
+            text_death_reason=new Text(globals::instance()->context);
+            text_death_reason->SetFont(globals::instance()->cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"),20);
+            text_death_reason->SetHorizontalAlignment(HA_CENTER);
+            text_death_reason->SetVerticalAlignment(VA_CENTER);
+            text_death_reason->SetName("Text");
+            text_death_reason->SetText("You died.");
+            button->AddChild(text_death_reason);
         }
         window_->AddChild(button);
     }

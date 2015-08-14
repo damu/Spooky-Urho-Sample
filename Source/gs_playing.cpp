@@ -232,10 +232,22 @@ void level::fix_occupied_ports()
                 open_ports.emplace(vec3(wp->node->node->GetChild(dp,true)->GetWorldPosition()),std::make_pair(wp,dp));
         }
     }
-
-    for(auto e:open_ports)
-        cout<<e.first.x_<<e.first.y_<<e.first.z_<<endl;
-        //TODO
+/*
+    for(auto e=open_ports.begin();e!=open_ports.end();e++)
+    {
+        if(open_ports.count(e->first)>2)
+        {
+            cout<<open_ports.count(e->first)<<" "<<e->first.x_<<" "<<e->first.y_<<" "<<e->first.z_<<endl;
+            auto iter=open_ports.equal_range(e->first);
+            for(decltype(iter.first) it=iter.first;it!=iter.second;it++)
+            {
+                //cout<<(int)((world_part*)it->second.first)<<" "<<it->second.second<<" "<<it->first.x_<<" "<<it->first.y_<<" "<<it->first.z_<<endl;
+                cout<<it->second.second.CString()<<" "<<it->first.x_<<" "<<it->first.y_<<" "<<it->first.z_<<endl;
+            }
+        }
+        for(int i=0;i<open_ports.count(e->first)-1;i++)
+            e++;
+    }*/
 }
 
 void level::place_end_pieces()
@@ -426,7 +438,7 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
     timer_playing=0;
 
     // spawn some enemies
-    for(int i=0;i<20;i++)
+    for(int i=0;i<0;i++)
     {
         PhysicsRaycastResult result;
         Vector3 pos(0,10,0);
@@ -543,9 +555,48 @@ std::string str;
     {
         Vector3 target=globals::instance()->camera->GetNode()->GetWorldPosition()+globals::instance()->camera->GetNode()->GetWorldDirection()*grab_distance;
         Vector3 source=grabbed_body->GetPosition();
-        grabbed_body->ApplyImpulse((target-source)*500*timeStep-grabbed_body->GetLinearVelocity()*0.05*grabbed_body->GetMass());
+        grabbed_body->ApplyImpulse((target-source)*500*timeStep-grabbed_body->GetLinearVelocity()*0.2*grabbed_body->GetMass());
         //if((target-source).Length()>1)
         //    grabbed_body=0;
+    }
+    else
+    {
+        PhysicsRaycastResult result;
+        Ray ray=globals::instance()->camera->GetScreenRay(0.5,0.5);
+        globals::instance()->physical_world->SphereCast(result,ray,0.1,2);
+        if(result.body_&&result.distance_<2&&result.body_!=player_->body)
+        {
+            if(!highlighted_body)
+            {
+                highlighted_body=result.body_;
+                Node* n=result.body_->GetNode();
+                if(!n)
+                    return;
+                StaticModel* m=n->GetComponent<StaticModel>();
+                if(!m)
+                    return;
+                highlight_old_materials.clear();
+                for(int i=0;i<m->GetNumGeometries();i++)
+                    highlight_old_materials.push_back(m->GetMaterial(i));
+                m->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/highlight.xml"));
+            }
+            return;
+        }
+    }
+    if(highlighted_body)
+    {
+        Node* n=highlighted_body->GetNode();
+        if(n)
+        {
+            StaticModel* m=n->GetComponent<StaticModel>();
+            if(m)
+            {
+                for(int i=0;i<highlight_old_materials.size();i++)
+                    m->SetMaterial(i,highlight_old_materials[i]);
+                highlight_old_materials.clear();
+            }
+        }
+        highlighted_body=0;
     }
 }
 

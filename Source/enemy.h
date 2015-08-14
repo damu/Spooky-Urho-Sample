@@ -30,8 +30,8 @@ public:
     Urho3D::Vector3 pos_last;
     Urho3D::AnimationState* as_stand;
     Urho3D::AnimationState* as_walk;
-    /*Urho3D::AnimationState* as_run;
-    Urho3D::AnimationState* as_jump;*/
+    Urho3D::AnimationState* as_run;
+    //Urho3D::AnimationState* as_jump;
     Urho3D::Node* node;
     Urho3D::Node* node_model;
     Urho3D::Node* node_aim;     ///< for aiming
@@ -39,11 +39,16 @@ public:
     Urho3D::RigidBody* body;
     Urho3D::SoundSource3D* sound_source1;
     Urho3D::SoundSource3D* sound_source2;
+    Urho3D::SoundSource3D* sound_source_eat;
     Urho3D::Sound* sound_step1;
     Urho3D::Sound* sound_step2;
+    Urho3D::Sound* sound_eat;
     Urho3D::Vector3 wander_target=Urho3D::Vector3(Urho3D::Random(-100,100),0,Urho3D::Random(-100,100));
     timer wander_timer;
     float wander_timeout=4+Urho3D::Random(0.0f,4.0f);
+    bool sound_step1_not_played=true;
+    bool sound_step2_not_played=true;
+    float animation_progress_last=0;
 
     enemy(Urho3D::Vector3 pos);
     ~enemy(){node->Remove();node_model->Remove();}

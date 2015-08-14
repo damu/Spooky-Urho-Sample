@@ -27,6 +27,7 @@ class gs_death : public game_state
 {
 public:
     Urho3D::Window* window_;
+    Urho3D::Text* text_death_reason;
 
     gs_death();
     void HandleRestartPressed(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);

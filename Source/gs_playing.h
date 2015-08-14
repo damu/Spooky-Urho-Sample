@@ -106,7 +106,9 @@ public:
     level current_level;
     delayed_action_handler delayed_actions;
     Urho3D::RigidBody* grabbed_body=0;      ///< while holding the mouse, things can be physically moved.
+    Urho3D::RigidBody* highlighted_body=0;
     float grab_distance=1;
+    std::vector<Urho3D::Material*> highlight_old_materials;
 
     gs_playing(std::string level_filename);
     void update(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
