@@ -133,7 +133,7 @@ level::level(std::string level_filename)
         }
 
         // TODO add adjustable room probability.
-        std::vector<String> world_part_list{"mineshaft_straight","mineshaft_straight","mineshaft_curve_90","mineshaft_cross","mineshaft_ramp"};
+        std::vector<String> world_part_list{"mineshaft_straight","mineshaft_straight","mineshaft_curve_90","mineshaft_cross","mineshaft_cross","mineshaft_ramp"};
 
         // place 50 other parts
         while(world_parts.size()<50||flag_positions.size()==0)
@@ -177,6 +177,7 @@ level::level(std::string level_filename)
                         pos=result.position_+Vector3(0,0.1,0);
 
                     auto node_stone=globals::instance()->scene->CreateChild("Stone");
+                    gs_playing::instance->nodes.emplace_back(node_stone);
                     StaticModel* boxObject=node_stone->CreateComponent<StaticModel>();
                     boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
                     boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/rock.xml"));
@@ -212,13 +213,26 @@ level::level(std::string level_filename)
 class vec3
 {
 public:
-    float x_,y_,z_;
+    int x_,y_,z_;   // ints to round the coordinates and prevent floating point fluctuation
 
-    vec3(const Vector3& o) : x_(o.x_),y_(o.y_),z_(o.z_) {}
+    vec3(const Vector3& o) : x_(round(o.x_)),y_(round(o.y_)),z_(round(o.z_)) {}
     bool operator<(const vec3& rhs) const
     {
-        if(x_<rhs.x_&&y_<rhs.y_&&z_<rhs.z_)
+        if(x_<rhs.x_)
             return true;
+        if(x_>rhs.x_)
+            return false;
+
+        if(y_<rhs.y_)
+            return true;
+        if(y_>rhs.y_)
+            return false;
+
+        if(z_<rhs.z_)
+            return true;
+        if(z_>rhs.z_)
+            return false;
+
         return false;
     }
 };
@@ -233,25 +247,30 @@ void level::fix_occupied_ports()
         for(String dp:wp->docking_points)
         {
             if(wp->docking_points_occupied.find(dp)==wp->docking_points_occupied.end())
-                open_ports.emplace(vec3(wp->node->node->GetChild(dp,true)->GetWorldPosition()),std::make_pair(wp,dp));
+                open_ports.insert(std::make_pair(vec3(wp->node->node->GetChild(dp,true)->GetWorldPosition()),std::make_pair(wp,dp)));
         }
     }
-/*
-    for(auto e=open_ports.begin();e!=open_ports.end();e++)
+
+    for(std::multimap<vec3,std::pair<world_part*,String>>::iterator e=open_ports.begin();e!=open_ports.end();e++)
     {
-        if(open_ports.count(e->first)>2)
+        if(open_ports.count(e->first)>=2)
         {
-            cout<<open_ports.count(e->first)<<" "<<e->first.x_<<" "<<e->first.y_<<" "<<e->first.z_<<endl;
             auto iter=open_ports.equal_range(e->first);
-            for(decltype(iter.first) it=iter.first;it!=iter.second;it++)
+            decltype(iter.first) it=iter.first;
+            world_part* wp_first=it->second.first;
+            String dock_first=it->second.second;
+            it++;
+            for(;it!=iter.second;it++)
             {
-                //cout<<(int)((world_part*)it->second.first)<<" "<<it->second.second<<" "<<it->first.x_<<" "<<it->first.y_<<" "<<it->first.z_<<endl;
-                cout<<it->second.second.CString()<<" "<<it->first.x_<<" "<<it->first.y_<<" "<<it->first.z_<<endl;
+                world_part* wp=it->second.first;
+                String dock=it->second.second;
+                wp_first->docking_points_occupied.insert(dock_first);
+                wp->docking_points_occupied.insert(dock);
             }
         }
         for(int i=0;i<open_ports.count(e->first)-1;i++)
             e++;
-    }*/
+    }
 }
 
 void level::place_end_pieces()
@@ -259,7 +278,7 @@ void level::place_end_pieces()
     int wp_count=world_parts.size();
     for(int i=0;i<wp_count;i++)
     {
-        world_part wp=world_parts[i];   // WEIRD: if I don't make a copy here (aka pointer or reference) wp is sometimes broken. Via value this works.
+        world_part wp=world_parts[i];   // WEIRD: if I don't make a copy here (aka pointer or reference) wp is sometimes broken. This works via value for some reason.
         for(String dp:wp.docking_points)
         {
             world_part wp_new("mineshaft_end");
@@ -413,7 +432,6 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
     // spawn one rock and remove it to cache the collider mesh (to avoid a ~1 second lag when spawning the first rock during the game)
     {
         auto node_stone=globals::instance()->scene->CreateChild("Stone");
-        nodes.emplace_back(node_stone);
         StaticModel* boxObject=node_stone->CreateComponent<StaticModel>();
         boxObject->SetModel(globals::instance()->cache->GetResource<Model>("Models/rock.mdl"));
         boxObject->SetMaterial(globals::instance()->cache->GetResource<Material>("Materials/rock.xml"));
@@ -629,6 +647,8 @@ void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
         enemies.emplace_back(new enemy(player_->node->GetPosition()+Vector3(5,2,0)));
     else if(key==KEY_P)
         player_->body->SetPosition(player_->body->GetPosition()+Vector3(0,20,0));
+    else if(key==KEY_T)
+        globals::instance()->camera->SetFillMode(globals::instance()->camera->GetFillMode()==FILL_WIREFRAME?FILL_SOLID:FILL_WIREFRAME);
 }
 
 void gs_playing::HandleMouseDown(StringHash eventType,VariantMap& eventData)

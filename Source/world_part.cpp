@@ -11,6 +11,8 @@ world_part::world_part(String model_name,Urho3D::Vector3 pos)
     AnimatedModel* boxObject=node->node->CreateComponent<AnimatedModel>();
     set_model(boxObject,globals::instance()->cache,("Data/Models/"+model_name).CString());
     boxObject->SetCastShadows(true);
+    boxObject->SetOccluder(true);
+    boxObject->SetOccludee(true);
 
     RigidBody* body=node->node->CreateComponent<RigidBody>();
     body->SetCollisionLayer(2);     // Use layer bitmask 2 for static geometry
