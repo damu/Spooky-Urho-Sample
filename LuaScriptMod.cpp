@@ -1,9 +1,9 @@
-#include "LuaScriptMod.h"
+/*#include "LuaScriptMod.h"
 #include <Urho3D/IO/Log.h>
 #include <Urho3D/Resource/ResourceCache.h>
 
-LuaScriptMod::LuaScriptMod(Context* context) : 
-    Object(context), 
+LuaScriptMod::LuaScriptMod(Context* context) :
+    Object(context),
     luaState_(0)
 {
     RegisterLuaScriptLibrary(context_);
@@ -68,7 +68,7 @@ bool LuaScriptMod::ExecuteFunction(const String& functionName)
     return function && function->BeginCall() && function->EndCall();
 }
 
-LuaFunction* LuaScriptMod::GetFunction(int functionIndex) 
+LuaFunction* LuaScriptMod::GetFunction(int functionIndex)
 {
     if (!lua_isfunction(luaState_, functionIndex))
         return 0;
@@ -203,3 +203,4 @@ bool LuaScriptMod::PushScriptFunction(const String& functionName, bool silentIfN
     return true;
 }
 
+*/

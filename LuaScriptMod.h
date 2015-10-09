@@ -4,11 +4,11 @@
 #include <Urho3D/LuaScript/LuaFunction.h>
 extern "C"
 {
-#include <Urho3D/ThirdParty/LuaJIT/lualib.h>
+//#include <Urho3D/ThirdParty/LuaJIT/src/lualib.h>
 }
-#include <toluapp/tolua++.h>
-#include <Urho3D/LuaScript/ToluaUtils.h>
-
+//#include <toluapp/tolua++.h>
+//#include <Urho3D/LuaScript/ToluaUtils.h>
+/*
 namespace Urho3D {
     extern void RegisterLuaScriptLibrary(Context* context);
 }
@@ -59,3 +59,4 @@ private:
     /// Function name to function map.
     HashMap<String, SharedPtr<LuaFunction> > functionNameToFunctionMap_;
 };
+*/

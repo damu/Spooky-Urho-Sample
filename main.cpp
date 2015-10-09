@@ -68,13 +68,13 @@ public:
     virtual void Start()
     {
         //Register the Lua mod API subsystem
-        context_->RegisterSubsystem(new LuaScriptMod(context_));
+/*        context_->RegisterSubsystem(new LuaScriptMod(context_));
         auto mod = context_->GetSubsystem<LuaScriptMod>();
         mod->ExecuteFile("LuaScripts/NoUrho.lua");
         auto func = mod->GetFunction("script_main");
         func->BeginCall();
         func->EndCall();
-
+*/
         ResourceCache* cache=GetSubsystem<ResourceCache>();
         GetSubsystem<UI>()->GetRoot()->SetDefaultStyle(cache->GetResource<XMLFile>("UI/DefaultStyle.xml"));
 
