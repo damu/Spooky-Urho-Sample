@@ -12,3 +12,4 @@ Build/*.layout
 *.kdev4
 *.swp
 *.swo
+Clean/

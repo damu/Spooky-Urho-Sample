@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <Urho3D/Urho3D.h>
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/Input/InputEvents.h>
