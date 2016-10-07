@@ -177,7 +177,7 @@ gs_main_menu::gs_main_menu() : game_state()
             button->AddChild(t);
         }
         window_menu->AddChild(button);
-        SubscribeToEvent(button,E_RELEASED,HANDLER(gs_main_menu,HandlePlayPressed));
+        SubscribeToEvent(button,E_RELEASED,URHO3D_HANDLER(gs_main_menu,HandlePlayPressed));
     }
     {
         Button* button = new Button(globals::instance()->context);
@@ -196,14 +196,14 @@ gs_main_menu::gs_main_menu() : game_state()
             button->AddChild(t);
         }
         window_menu->AddChild(button);
-        SubscribeToEvent(button,E_RELEASED,HANDLER(gs_main_menu,HandleClosePressed));
+        SubscribeToEvent(button,E_RELEASED,URHO3D_HANDLER(gs_main_menu,HandleClosePressed));
     }
 
     GetSubsystem<Input>()->SetMouseVisible(true);
     GetSubsystem<Input>()->SetMouseGrabbed(false);
 
-    SubscribeToEvent(E_UPDATE,HANDLER(gs_main_menu,update));
-    SubscribeToEvent(E_KEYDOWN,HANDLER(gs_main_menu,HandleKeyDown));
+    SubscribeToEvent(E_UPDATE,URHO3D_HANDLER(gs_main_menu,update));
+    SubscribeToEvent(E_KEYDOWN,URHO3D_HANDLER(gs_main_menu,HandleKeyDown));
 }
 
 void gs_main_menu::update(StringHash eventType,VariantMap& eventData)
@@ -288,7 +288,7 @@ void gs_main_menu::HandleKeyDown(StringHash eventType,VariantMap& eventData)
 {
     using namespace KeyDown;
     int key=eventData[P_KEY].GetInt();
-    if(key==KEY_ESC)
+    if(key==KEY_ESCAPE)
         globals::instance()->engine->Exit();
     else if(key==KEY_G)
         window_menu->SetVisible(!window_menu->IsVisible());

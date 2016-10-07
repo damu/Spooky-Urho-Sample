@@ -1,0 +1,12 @@
+<material>
+    <technique name="Techniques/DiffNormalSpecParallax2.xml" quality="0" />
+    <texture unit="diffuse" name="Textures/StoneFloorDiffuse.jpg" />
+    <texture unit="normal" name="Textures/StoneFloorNormal.jpg" />
+	<texture unit="specular" name ="Textures/StoneFloorDisplacement.jpg" />
+	<texture unit="emissive" name ="Textures/StoneFloorDisplacement.jpg" />
+	<parameter name="ParallaxIters" value="2" />
+	<parameter name="ParallaxDisplacement" value=".045" />
+	<parameter name="OffsetLimit" value=".5" />
+	<parameter name="MatDiffColor" value="1 1 1 1" />
+    <parameter name="MatSpecColor" value="1 1 1 16" />
+</material>

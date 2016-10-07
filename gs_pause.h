@@ -36,7 +36,7 @@ public:
     void HandleMainMenuPressed(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
     void HandleQuitPressed(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData){globals::instance()->engine->Exit();}
 
-    virtual const Urho3D::String& GetTypeName() const {static Urho3D::String name("gs_pause");return name;}   // this could be correct
+    URHO3D_OBJECT(gs_pause,game_state)
 };
 
 #endif // GS_PAUSE_H

@@ -34,7 +34,7 @@ public:
     void HandleRestartPressed(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
     void HandleMainMenuPressed(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
 
-    virtual const Urho3D::String& GetTypeName() const {static Urho3D::String name("gs_level_end");return name;}   // this could be correct
+    URHO3D_OBJECT(gs_level_end,game_state)
 };
 
 #endif // GS_LEVEL_END_H

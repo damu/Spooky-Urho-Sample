@@ -48,13 +48,13 @@
 using namespace Urho3D;
 
 /// USP main class mainly used for setup. The control is then given to the game states (starting with gs_main_menu).
-class USP : public Application
+class SUS : public Application
 {
 public:
     SharedPtr<Scene> scene_;
     Node* cameraNode_;
 
-    USP(Context * context) : Application(context) {}
+    SUS(Context * context) : Application(context) {}
 
     virtual void Setup()
     {
@@ -110,7 +110,7 @@ public:
         zone->SetFogEnd(200000.0f);
         zone->SetAmbientColor(Color(0.3,0.3,0.3));
 
-        SubscribeToEvent(E_KEYDOWN,HANDLER(USP,HandleKeyDown));
+        SubscribeToEvent(E_KEYDOWN,URHO3D_HANDLER(SUS,HandleKeyDown));
 
         // fill our game state shared variables
         globals::instance()->cache=cache;
@@ -140,4 +140,4 @@ public:
     }
 };
 
-DEFINE_APPLICATION_MAIN(USP)
+URHO3D_DEFINE_APPLICATION_MAIN(SUS)

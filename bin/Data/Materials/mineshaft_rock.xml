@@ -1,0 +1,9 @@
+<material>
+    <technique name="Techniques/DiffNormalSpec_triplanar.xml"/>
+    <texture name="Textures/mineshaft_diff.jpg" unit="diffuse"/>
+    <texture name="Textures/mineshaft_norm.jpg" unit="normal"/>
+    <texture name="Textures/mineshaft_diff.jpg" unit="specular"/>
+    <parameter name="MatDiffColor" value="0.3 0.3 0.3 1"/>
+    <parameter name="MatSpecColor" value="0.1 0.1 0.1 350"/>
+    <shadowcull value="none" />
+</material>

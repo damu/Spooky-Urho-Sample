@@ -328,10 +328,10 @@ gs_playing::gs_playing(std::string level_filename) : game_state()
     GetSubsystem<Input>()->SetMouseVisible(false);
     GetSubsystem<Input>()->SetMouseGrabbed(true);
 
-    SubscribeToEvent(E_UPDATE,HANDLER(gs_playing,update));
-    SubscribeToEvent(E_KEYDOWN,HANDLER(gs_playing,HandleKeyDown));
-    SubscribeToEvent(E_MOUSEBUTTONDOWN,HANDLER(gs_playing,HandleMouseDown));
-    SubscribeToEvent(E_MOUSEBUTTONUP,HANDLER(gs_playing,HandleMouseUp));
+    SubscribeToEvent(E_UPDATE,URHO3D_HANDLER(gs_playing,update));
+    SubscribeToEvent(E_KEYDOWN,URHO3D_HANDLER(gs_playing,HandleKeyDown));
+    SubscribeToEvent(E_MOUSEBUTTONDOWN,URHO3D_HANDLER(gs_playing,HandleMouseDown));
+    SubscribeToEvent(E_MOUSEBUTTONUP,URHO3D_HANDLER(gs_playing,HandleMouseUp));
 
     current_level=level(level_filename);
     for(auto& sm:current_level.static_models)
@@ -631,7 +631,7 @@ void gs_playing::HandleKeyDown(StringHash eventType,VariantMap& eventData)
         return;
     using namespace KeyDown;
     int key=eventData[P_KEY].GetInt();
-    if(key==KEY_ESC)
+    if(key==KEY_ESCAPE)
         globals::instance()->game_states.emplace_back(new gs_pause);
 
     if(key==KEY_L)
@@ -677,7 +677,6 @@ void gs_playing::HandleStoneCollision(StringHash eventType,VariantMap& eventData
     sound_source->SetFarDistance(55);
     sound_source->SetSoundType(SOUND_EFFECT);
     sound_source->SetFrequency(44100/(node->GetScale().x_*3.0));
-    sound_source->SetAutoRemove(true);
     sound_source->SetGain(std::min(1.0,1.5*body->GetLinearVelocity().Length()));
     sound_source->Play(sound_stone_collision);
 }

@@ -52,7 +52,7 @@ gs_pause::gs_pause() : game_state()
 
         }
         window_->AddChild(button);
-        SubscribeToEvent(button,E_RELEASED,HANDLER(gs_pause,HandleResumePressed));
+        SubscribeToEvent(button,E_RELEASED,URHO3D_HANDLER(gs_pause,HandleResumePressed));
     }
     {
         Button* button = new Button(globals::instance()->context);
@@ -71,7 +71,7 @@ gs_pause::gs_pause() : game_state()
 
         }
         window_->AddChild(button);
-        SubscribeToEvent(button,E_RELEASED,HANDLER(gs_pause,HandleRestartPressed));
+        SubscribeToEvent(button,E_RELEASED,URHO3D_HANDLER(gs_pause,HandleRestartPressed));
     }
     {
         Button* button = new Button(globals::instance()->context);
@@ -89,7 +89,7 @@ gs_pause::gs_pause() : game_state()
             button->AddChild(t);
         }
         window_->AddChild(button);
-        SubscribeToEvent(button,E_RELEASED,HANDLER(gs_pause,HandleMainMenuPressed));
+        SubscribeToEvent(button,E_RELEASED,URHO3D_HANDLER(gs_pause,HandleMainMenuPressed));
     }
     {
         Button* button = new Button(globals::instance()->context);
@@ -107,13 +107,13 @@ gs_pause::gs_pause() : game_state()
             button->AddChild(t);
         }
         window_->AddChild(button);
-        SubscribeToEvent(button,E_RELEASED,HANDLER(gs_pause,HandleQuitPressed));
+        SubscribeToEvent(button,E_RELEASED,URHO3D_HANDLER(gs_pause,HandleQuitPressed));
     }
 
     GetSubsystem<Input>()->SetMouseVisible(true);
     GetSubsystem<Input>()->SetMouseGrabbed(false);
 
-    SubscribeToEvent(E_KEYDOWN,HANDLER(gs_pause,HandleKeyDown));
+    SubscribeToEvent(E_KEYDOWN,URHO3D_HANDLER(gs_pause,HandleKeyDown));
 }
 
 gs_pause::~gs_pause()
@@ -146,7 +146,7 @@ void gs_pause::HandleKeyDown(StringHash eventType,VariantMap& eventData)
 {
     using namespace KeyDown;
     int key=eventData[P_KEY].GetInt();
-    if(key==KEY_ESC)
+    if(key==KEY_ESCAPE)
     {
         GetSubsystem<Input>()->SetMouseVisible(false);
         GetSubsystem<Input>()->SetMouseGrabbed(true);

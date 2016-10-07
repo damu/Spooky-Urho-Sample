@@ -80,7 +80,7 @@ enemy::enemy(Vector3 pos) : Object(globals::instance()->context)
         sound_source_eat->SetGain(0.5);
     }
 
-    SubscribeToEvent(E_UPDATE,HANDLER(enemy,update));
+    SubscribeToEvent(E_UPDATE,URHO3D_HANDLER(enemy,update));
 }
 
 void enemy::update(StringHash eventType,VariantMap& eventData)
@@ -125,7 +125,7 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
                 if(!sound_source_eat->IsPlaying())
                 {
                     sound_source_eat->Play(sound_eat);
-                    auto gs_d=new gs_death;
+                    gs_death* gs_d=new gs_death;
                     globals::instance()->game_states.emplace_back(gs_d);
                     gs_d->text_death_reason->SetText("You got killed by a monster.");
                 }
@@ -144,7 +144,7 @@ void enemy::update(StringHash eventType,VariantMap& eventData)
                     yaw_diff+=360;
 
                 if(yaw_diff<-5||yaw_diff>5)
-                    body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*100,-1500.0,1500.0),0));
+                    body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*100.0,-1500.0,1500.0),0));
 
                 moveDir+=Vector3::FORWARD*1;
             }
@@ -178,7 +178,7 @@ wander:
                     yaw_diff+=360;
 
                 if(yaw_diff<-5||yaw_diff>5)
-                    body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*50,-300.0,300.0),0));
+                    body->ApplyTorque(Vector3(0,Clamp(-yaw_diff*50.0,-300.0,300.0),0));
 
                 moveDir+=Vector3::FORWARD*1;
                 as_current=as_walk;

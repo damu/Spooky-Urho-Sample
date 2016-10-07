@@ -54,10 +54,7 @@ public:
     ~enemy(){node->Remove();node_model->Remove();}
     void update(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
 
-    // these three functions need to be here because of Urho3D::Object
-    virtual Urho3D::StringHash GetType() const {return GetTypeName();}
-    virtual Urho3D::StringHash GetBaseType() const {return GetTypeName();}
-    virtual const Urho3D::String& GetTypeName() const {static Urho3D::String name("enemy");return name;}
+    URHO3D_OBJECT(enemy,Object)
 };
 
 #endif // PLAYER_H

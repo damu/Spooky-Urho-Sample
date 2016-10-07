@@ -1,0 +1,3 @@
+<xml skybox="Materials/skybox_space.xml">
+  <static_model name="Data/Models/level_2" pos_x="0" pos_y="0" pos_z="0" />
+</xml>

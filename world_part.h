@@ -60,7 +60,7 @@ public:
     /// \brief Returns the name of an random unoccupied docking point, or an empty String if no dock is free.
     Urho3D::String get_free_dock_name()
     {
-        std::shuffle(docking_points.begin(),docking_points.end(),std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
+//        std::shuffle(docking_points.begin(),docking_points.end(),std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
         for(auto e:docking_points)
             if(docking_points_occupied.find(e)==docking_points_occupied.end())
                 return e;

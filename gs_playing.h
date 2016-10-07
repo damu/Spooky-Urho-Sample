@@ -119,7 +119,7 @@ public:
     void HandleStoneCollision(Urho3D::StringHash eventType,Urho3D::VariantMap& eventData);
     void spawn_torch(Urho3D::Vector3 pos);
 
-    virtual const Urho3D::String& GetTypeName() const {static Urho3D::String name("gs_playing");return name;}   // this could be correct
+    URHO3D_OBJECT(gs_playing,game_state)
 };
 
 #endif // GS_PLAYING_H
