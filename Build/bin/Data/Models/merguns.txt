@@ -1,3 +1,0 @@
-Materials/merguns_eyes.xml
-Materials/merguns_body.xml
-Materials/merguns_teeth.xml

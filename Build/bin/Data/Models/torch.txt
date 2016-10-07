@@ -1,3 +1,0 @@
-Materials/torch_coal.xml
-Materials/torch_metal.xml
-Materials/torch_wood.xml

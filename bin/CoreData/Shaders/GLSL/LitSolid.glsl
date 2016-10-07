@@ -13,9 +13,16 @@
 #endif
 varying vec3 vNormal;
 varying vec4 vWorldPos;
+#ifdef VERTEXCOLOR
+    varying vec4 vColor;
+#endif
 #ifdef PERPIXEL
     #ifdef SHADOW
-        varying vec4 vShadowPos[NUMCASCADES];
+        #ifndef GL_ES
+            varying vec4 vShadowPos[NUMCASCADES];
+        #else
+            varying highp vec4 vShadowPos[NUMCASCADES];
+        #endif
     #endif
     #ifdef SPOTLIGHT
         varying vec4 vSpotPos;
@@ -42,6 +49,10 @@ void VS()
     vNormal = GetWorldNormal(modelMatrix);
     vWorldPos = vec4(worldPos, GetDepth(gl_Position));
 
+    #ifdef VERTEXCOLOR
+        vColor = iColor;
+    #endif
+
     #ifdef NORMALMAP
         vec3 tangent = GetWorldTangent(modelMatrix);
         vec3 bitangent = cross(tangent, vNormal) * iTangent.w;
@@ -58,12 +69,12 @@ void VS()
         #ifdef SHADOW
             // Shadow projection: transform from world space to shadow space
             for (int i = 0; i < NUMCASCADES; i++)
-                vShadowPos[i] = GetShadowPos(i, projWorldPos);
+                vShadowPos[i] = GetShadowPos(i, vNormal, projWorldPos);
         #endif
 
         #ifdef SPOTLIGHT
             // Spotlight projection: transform from world space to projector texture coordinates
-            vSpotPos =  projWorldPos * cLightMatrices[0];
+            vSpotPos = projWorldPos * cLightMatrices[0];
         #endif
     
         #ifdef POINTLIGHT
@@ -75,7 +86,7 @@ void VS()
             // If using lightmap, disregard zone ambient light
             // If using AO, calculate ambient in the PS
             vVertexLight = vec3(0.0, 0.0, 0.0);
-            vTexCoord2 = iTexCoord2;
+            vTexCoord2 = iTexCoord1;
         #else
             vVertexLight = GetAmbient(GetZonePos(worldPos));
         #endif
@@ -105,6 +116,10 @@ void PS()
         vec4 diffColor = cMatDiffColor * diffInput;
     #else
         vec4 diffColor = cMatDiffColor;
+    #endif
+
+    #ifdef VERTEXCOLOR
+        diffColor *= vColor;
     #endif
     
     // Get material specular albedo
@@ -157,7 +172,7 @@ void PS()
         #endif
 
         #ifdef AMBIENT
-            finalColor += cAmbientColor * diffColor.rgb;
+            finalColor += cAmbientColor.rgb * diffColor.rgb;
             finalColor += cMatEmissiveColor;
             gl_FragColor = vec4(GetFog(finalColor, fogFactor), diffColor.a);
         #else
@@ -177,7 +192,7 @@ void PS()
         vec3 finalColor = vVertexLight * diffColor.rgb;
         #ifdef AO
             // If using AO, the vertex light ambient is black, calculate occluded ambient here
-            finalColor += texture2D(sEmissiveMap, vTexCoord2).rgb * cAmbientColor * diffColor.rgb;
+            finalColor += texture2D(sEmissiveMap, vTexCoord2).rgb * cAmbientColor.rgb * diffColor.rgb;
         #endif
 
         #ifdef ENVCUBEMAP
@@ -201,7 +216,7 @@ void PS()
         vec3 finalColor = vVertexLight * diffColor.rgb;
         #ifdef AO
             // If using AO, the vertex light ambient is black, calculate occluded ambient here
-            finalColor += texture2D(sEmissiveMap, vTexCoord2).rgb * cAmbientColor * diffColor.rgb;
+            finalColor += texture2D(sEmissiveMap, vTexCoord2).rgb * cAmbientColor.rgb * diffColor.rgb;
         #endif
         
         #ifdef MATERIAL
